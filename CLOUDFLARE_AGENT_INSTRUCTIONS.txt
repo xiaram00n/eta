@@ -1,0 +1,12 @@
+Connect the attached ETA frontend to the EXISTING eta-stvi Worker. Do not create a new project, replace the API backend, remove secrets/bindings, or touch DNS. First inspect existing code and configuration and show the proposed diff.
+
+1. Rotate the admin token disclosed in the chat, using a new secret. Do not paste the replacement in chat or frontend files. Tell me how to retrieve it securely.
+2. Merge these static assets with the current Worker, preserving existing /api/responses, /api/admin/*, D1 binding and all validation/auth behavior.
+3. Route /, /partnership and /questionnaire to the included HTML. Ensure /api/* runs the backend before asset fallback. Read README.txt for payload mapping and cautions.
+4. Check actual backend field limits and tighten contact input limits accordingly. Retain optional/anonymous answers, consent gating, exact-payload retry behavior and test flags.
+5. Protect the admin HTML AND admin API routes. Do not put an admin secret in the public JavaScript. The unlisted partnership route is NOT private unless explicitly protected.
+6. Show any route/config/security changes for approval before deployment. No new paid resources or plan changes.
+7. With permission, perform end-to-end TEST submissions using /questionnaire?test=1; verify real saving, retrieval, retries, deduplication, anonymous responses, validation, exports and existing auth. Identify test record IDs. Do not delete production records.
+8. Return separately verified guest, partnership and questionnaire URLs, plus remaining limitations. Do not call it complete based only on an HTTP 200.
+
+English content is for review. Do not translate or redesign it yet. Do not replace the full questionnaire with a generic contact form.
