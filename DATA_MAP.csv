@@ -1,0 +1,42 @@
+question_id,question,placement,decision_or_gap
+working_arrangement,How do you work?,base path / conditional,Segment business and services; interpret answers correctly
+scope,Who will these answers describe?,optional detail,Segment business and services; interpret answers correctly
+services_selected,What services do you provide?,base path / conditional,Segment business and services; interpret answers correctly
+vehicles,How many vehicles do these answers cover?,optional detail,Segment business and services; interpret answers correctly
+booking_sources,Where does most of your work come from? Choose up to three.,base path / conditional,"Understand booking flow, uncompleted requests and guest needs"
+request_handler,"When you are driving, who handles new requests?",base path / conditional,"Understand booking flow, uncompleted requests and guest needs"
+lost_requests_30d,"In the last 30 days, how many requests did not turn into completed work?",base path / conditional,"Understand booking flow, uncompleted requests and guest needs"
+lost_reasons,What were the main reasons? Choose up to three.,base path / conditional,"Understand booking flow, uncompleted requests and guest needs"
+guest_help,What do guests most often need help with? Choose up to three.,base path / conditional,"Understand booking flow, uncompleted requests and guest needs"
+recent_example,Anything about a recent booking you wish had gone differently? (optional),optional detail,"Understand booking flow, uncompleted requests and guest needs"
+admin_time_daily,"On a typical working day, how much time do you spend arranging work, apart from driving?",base path / conditional,Identify coordination work and capacity constraints
+admin_tasks,Which parts take the most time? Choose up to three.,base path / conditional,Identify coordination work and capacity constraints
+capacity_limits,What keeps you from taking work you would otherwise want? Choose up to three.,base path / conditional,Identify coordination work and capacity constraints
+spare_capacity,When would you usually welcome more work?,base path / conditional,Identify coordination work and capacity constraints
+tools_used,How do you keep track of confirmed bookings?,optional detail,Identify coordination work and capacity constraints
+month_context,"Was the last 30 days quiet, typical or busy?",base path / conditional,Assess optional financial context without claiming profit
+requests_30d,About how many requests did you receive in the last 30 days?,optional detail,Assess optional financial context without claiming profit
+expenses_paid,Which costs do you pay?,optional detail,Assess optional financial context without claiming profit
+expenses_30d,About how much did you pay in business costs in the last 30 days?,optional detail,Assess optional financial context without claiming profit
+pass_through,Do the payments you collect include money you pass on to other operators?,optional detail,Assess optional financial context without claiming profit
+channels,How do you share work or contact other drivers?,base path / conditional,Preserve networks; identify costs and verification needs
+allocation,"When work is shared, how is it assigned?",optional detail,Preserve networks; identify costs and verification needs
+network_value,What works well that you would want to keep?,base path / conditional,Preserve networks; identify costs and verification needs
+network_costs,Do you pay to receive shared work?,optional detail,Preserve networks; identify costs and verification needs
+restrictions,What affects which work you can accept?,optional detail,Preserve networks; identify costs and verification needs
+community_detail,Are there local arrangements or driver practices we should understand? (optional),optional detail,Preserve networks; identify costs and verification needs
+priorities,What would you most want to improve? Choose up to three.,base path / conditional,"Prioritize product, adoption constraints and consent"
+improvement_detail,What have we missed? (optional),base path / conditional,"Prioritize product, adoption constraints and consent"
+barriers,What would concern you about using a new booking tool?,optional detail,"Prioritize product, adoption constraints and consent"
+payment_model,"If a tool proved useful, how would you prefer to pay?",base path / conditional,"Prioritize product, adoption constraints and consent"
+pilot_interest,Would you like to try a prototype?,base path / conditional,"Prioritize product, adoption constraints and consent"
+follow_up_consent,May we contact you about your answers or a prototype?,base path / conditional,"Prioritize product, adoption constraints and consent"
+contact_name,Your name (optional),base path / conditional,"Prioritize product, adoption constraints and consent"
+contact_phone,Phone / WhatsApp (optional),base path / conditional,"Prioritize product, adoption constraints and consent"
+contact_email,Email (optional),base path / conditional,"Prioritize product, adoption constraints and consent"
+services.<selected>.completed_30d,completed_30d,optional service figures,Understand service economics and capacity; verify reporting unit in follow-up
+services.<selected>.typical_group_size,typical_group_size,optional service figures,Understand service economics and capacity; verify reporting unit in follow-up
+services.<selected>.charge_unit,charge_unit,optional service figures,Understand service economics and capacity; verify reporting unit in follow-up
+services.<selected>.typical_price_usd,typical_price_usd,optional service figures,Understand service economics and capacity; verify reporting unit in follow-up
+services.<selected>.occupied_hours,occupied_hours,optional service figures,Understand service economics and capacity; verify reporting unit in follow-up
+services.<selected>.receipts_30d_usd,receipts_30d_usd,optional service figures,Understand service economics and capacity; verify reporting unit in follow-up

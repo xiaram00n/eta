@@ -1,0 +1,54 @@
+MERGE, DO NOT REPLACE THE BACKEND
+
+1. Keep existing Worker routes, D1 binding eta_responses, database UUID, secrets,
+   schema and admin authentication. Do not replace worker.js with a static server.
+2. Use public/ as the static asset directory, retaining the directory hierarchy.
+   / -> public/index.html
+   /partnership/ -> public/partnership/index.html
+   /questionnaire/ -> public/questionnaire/index.html
+   /assets/* -> public/assets/*
+   Configure or verify extensionless routes /partnership and /questionnaire.
+3. API routes must run BEFORE static asset fallback. Never rewrite /api/* to HTML.
+4. Preserve /admin. Resolve the backend blockers in REASSESSMENT.md separately.
+5. Questionnaire version is 1.1.0; historical 1.0.0 answers remain unchanged.
+   Service answer keys, working_arrangement, pilot_interest boolean and contact
+   fields retain compatibility with the documented contract.
+6. This version uses new draft keys. Existing old drafts are not migrated or
+   submitted automatically. No production records were modified.
+7. Never publish this entire packet as the asset directory. Publish public/ only.
+   The internal research guide and audit must not become public guest pages.
+
+CHECKS PERFORMED HERE
+- Both generated JavaScript files passed Node --check.
+- Local page/asset references and question ID uniqueness checked programmatically.
+- ZIP written and reopened with integrity check.
+- No browser automation, mobile device test, live API write, D1 read or deployment.
+- Tests below are required, NOT claimed as passed.
+
+STAGING RELEASE TESTS
+- Open all three routes on phone and desktop; keyboard navigation, labels,
+  focus, readable text, zoom, overflow, contrast and browser compatibility.
+- No intro jargon, forced name, required finances, raw JSON or sales promises.
+- Conditional service questions only reflect selected services; max-three choices
+  and exclusive none/not-sure work; blank numbers remain absent, not zero.
+- Back/Next and readable review preserve answers. Invalid email/numbers are caught.
+- Consent no/unanswered sends no contact; consent yes sends only provided contacts.
+- Anonymous complete submission succeeds. Confirm the stored record, not just UI.
+- /questionnaire/?test=1 sends is_test:true; keep test records out of research.
+- Offline, timeout, unreadable response and server 500: never show success;
+  preserve exact payload AND submission ID. Retry creates no duplicate.
+- 422: show correction path and retain answers. 429: preserve pending submission.
+- Refresh during uncertain submission: retry frozen pending payload. Successful
+  confirmation clears draft and pending keys. Double click cannot send new IDs.
+- Admin unauthenticated denied; filters work across pages; export handles Arabic,
+  BOM, flattened fields, test exclusion and spreadsheet formulas safely.
+- Rotation of exposed token confirmed out of chat. No frontend/admin secret.
+- Simulate D1 failure in staging; assert structured safe failure and no false save.
+- Review data access, retention and deletion process before fieldwork.
+- Guest preview never sends data or requests card details. Simulated states stay
+  visibly labeled. No invented approved fare or live tracking claim.
+
+NOT IMPLEMENTED
+Production booking engine, real availability reservation, dispatch, GPS, payment
+processor, authentication/Access changes, backend patches, Arabic translation,
+operator branding uploads and complex itinerary/manifests.

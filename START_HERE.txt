@@ -1,0 +1,25 @@
+ETA — REBUILT REVIEW PACKET | 10 November 2026
+
+This is a downloadable replacement packet, not a deployment.
+No repository, Worker, D1, secret or existing response was changed.
+English only. Arabic follows content approval.
+
+CONTENTS
+public/ — three mobile-responsive frontend experiences:
+  index.html — guest preview
+  partnership/index.html — partner walkthrough
+  questionnaire/index.html — real research questionnaire
+  assets/ — shared CSS, separate scripts and question schema
+REASSESSMENT.md — decisions, evidence, limitations and release blockers
+PARTNER_RESEARCH_GUIDE.md — deeper questions not imposed on every operator
+DATA_MAP.csv — why each question exists and where it belongs
+DEPLOYMENT_AND_TESTS.txt — merge instructions and release test plan
+
+Open through an HTTP server or Cloudflare assets. Do not double-click HTML
+and assume absolute asset paths will work. Routes require their directories.
+Do not flatten the ZIP.
+
+The operator form calls the existing same-origin POST /api/responses.
+The guest form sends nothing. No real payment or GPS is implemented.
+The partnership page makes no financial commitment or agreed ownership claim.
+Do not distribute the questionnaire until submission tests pass on staging.
