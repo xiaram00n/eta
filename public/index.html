@@ -1,1 +1,186 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Plan your transportation</title><link rel="stylesheet" href="/assets/style.css"></head><body><header><a href="/">ETA</a><nav></nav></header><main><p class="notice">Guest preview · Sample operator. Requests, prices, payment and trip updates are demonstrations.</p><section class="intro"><p>ST. THOMAS, USVI</p><h1>Plan your ride.</h1><p>Tell us where you’re going and when. Review your request before sending it.</p></section><div class="grid"><div class="card"><h2>Taxi & transfers</h2><p>Airport, ferry and local rides.</p></div><div class="card"><h2>Private tours</h2><p>Your group, your stops and time to explore.</p></div><div class="card"><h2>Villa stays</h2><p>Arrange arrival, outings and departure.</p></div><div class="card"><h2>Weddings & events</h2><p>Plan transport for your guests and wedding party.</p></div></div><form id="trip" class="card"><h2>Your plans</h2><label>What are you arranging?<select name="service"><option>Taxi / local ride</option><option>Airport / ferry transfer</option><option>Private tour</option><option>Villa stay transportation</option><option>Wedding / event transportation</option></select></label><label>Pickup location<input name="pickup" required maxlength="300" autocomplete="off"></label><label>Destination / stops<input name="destination" required maxlength="500"></label><label>Date<input type="date" name="date" required></label><label>Pickup time<input type="time" name="time" required></label><label>Number of guests<input type="number" min="1" max="200" name="guests" required></label><label>Luggage, accessibility needs or other details (optional)<textarea name="notes" maxlength="1500"></textarea></label><p class="small">For multiple trips, include your itinerary here. The operator would confirm each trip, available vehicles and the price.</p><button>Review request</button></form><section id="preview" class="card hidden" aria-live="polite"></section></main><footer>ETA · St. Thomas, USVI</footer><script src="/assets/guest.js" defer></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#123f43">
+  <meta name="description" content="Explore an ETA guest experience for rides, airport transfers, private tours, villa stays and wedding transportation in St. Thomas.">
+  <title>ETA | Your island transportation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23123f43'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Arial' font-weight='700' font-size='26' fill='%23f8f4eb'%3EETA%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/assets/guest.css">
+  <script src="/assets/guest.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="edition-bar">
+    <span>St. Thomas <span aria-hidden="true">/</span> U.S. Virgin Islands</span>
+    <span class="demo-mark"><span class="small-dot" aria-hidden="true"></span> Interactive service preview</span>
+  </div>
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="ETA home">ETA<span aria-hidden="true">.</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#ride">Rides</a>
+      <a href="#experiences" data-open-service="tour">Tours</a>
+      <a href="#experiences" data-open-service="villa">Stays</a>
+      <a href="#experiences" data-open-service="wedding">Weddings</a>
+    </nav>
+    <button class="button button-outline plans-button" type="button" data-action="my-plans">
+      My plans <span id="plan-count" class="count">0</span>
+    </button>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="ride" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="line-mark" aria-hidden="true"></span> A better way around the island</p>
+        <h1 id="hero-title">Where are<br>you <em>headed?</em></h1>
+        <p class="hero-description">From your airport arrival to your last evening out, keep your island transportation in one place.</p>
+        <form id="quick-booking" class="ride-composer" inert>
+          <div class="composer-top">
+            <label class="sr-only" for="quick-service">Ride type</label>
+            <select id="quick-service" name="service">
+              <option value="taxi">Local ride</option>
+              <option value="transfer">Airport &amp; ferry transfer</option>
+            </select>
+            <span class="composer-caption">Your ride, your schedule</span>
+          </div>
+          <div class="route-fields">
+            <span class="route-thread" aria-hidden="true"><i></i><i></i></span>
+            <label>Pickup
+              <input id="quick-pickup" name="pickup" list="island-places" placeholder="Where should we meet you?" maxlength="150" required autocomplete="off">
+            </label>
+            <label>Destination
+              <input id="quick-destination" name="destination" list="island-places" placeholder="Where are you going?" maxlength="150" required autocomplete="off">
+            </label>
+          </div>
+          <div class="quick-details">
+            <label>When
+              <select id="quick-when" name="when">
+                <option value="soon">Next available</option>
+                <option value="scheduled">Choose a time</option>
+              </select>
+            </label>
+            <label>Guests
+              <input id="quick-guests" name="guests" type="number" min="1" max="200" value="2" required inputmode="numeric">
+            </label>
+          </div>
+          <button id="quick-submit" type="submit" class="button button-dark composer-submit" disabled>Find a ride <span aria-hidden="true">&#8599;</span></button>
+          <p class="composer-footnote">Prefer to plan ahead? Add a return or more stops in the next step.</p>
+        </form>
+        <button type="button" class="text-button sample-link" data-action="sample-ride">Just looking? Take a sample ride <span aria-hidden="true">&#8594;</span></button>
+      </div>
+
+      <div class="island-scene">
+        <div class="scene-heading"><span class="eyebrow">18.34&#176; N &nbsp; 64.93&#176; W</span><span class="scene-edition">01 / ST. THOMAS</span></div>
+        <svg class="island-art" viewBox="0 0 640 680" role="img" aria-labelledby="island-title island-description">
+          <title id="island-title">An illustrated journey across St. Thomas</title>
+          <desc id="island-description">A stylized island, coastal roads, Charlotte Amalie and Red Hook. Decorative illustration, not a navigation map.</desc>
+          <defs>
+            <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b9d8cd"/><stop offset="1" stop-color="#70a9a0"/></linearGradient>
+            <linearGradient id="land" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#dedec4"/><stop offset="1" stop-color="#9eb698"/></linearGradient>
+            <pattern id="sea-lines" width="56" height="56" patternUnits="userSpaceOnUse"><path d="M-15 28Q0 14 15 28T45 28T75 28" fill="none" stroke="#f8f4eb" stroke-opacity=".15"/></pattern>
+            <filter id="land-shadow" x="-.3" y="-.3" width="1.6" height="1.6"><feDropShadow dx="0" dy="14" stdDeviation="13" flood-color="#174b49" flood-opacity=".14"/></filter>
+          </defs>
+          <rect width="640" height="680" fill="url(#sea)"/>
+          <rect width="640" height="680" fill="url(#sea-lines)"/>
+          <g transform="translate(-12 35) rotate(-17 320 300)">
+            <path d="M62 352Q56 305 95 272L159 245Q190 206 233 224L277 187Q305 176 329 208L380 200Q410 209 431 239L479 238L505 274L554 277L586 312L557 344L517 341L496 376L457 369L421 393L381 372L344 386L300 367L267 398L229 380L196 397L159 371L120 386Z" fill="#e9e3ca" stroke="#d4e4cd" stroke-width="18" filter="url(#land-shadow)"/>
+            <path d="M62 352Q56 305 95 272L159 245Q190 206 233 224L277 187Q305 176 329 208L380 200Q410 209 431 239L479 238L505 274L554 277L586 312L557 344L517 341L496 376L457 369L421 393L381 372L344 386L300 367L267 398L229 380L196 397L159 371L120 386Z" fill="url(#land)"/>
+            <g fill="none" stroke="#f4efdc" stroke-opacity=".6">
+              <path d="M94 331Q160 262 233 260T361 257T534 311"/>
+              <path d="M104 347Q166 288 242 291T365 284T525 326"/>
+              <path d="M150 345Q197 321 262 320T390 315T488 341"/>
+              <path d="M204 252Q238 243 263 215M287 239Q313 225 321 248M355 230Q387 226 402 253"/>
+            </g>
+            <path d="M109 343Q147 310 184 329T253 337Q291 342 316 311T386 310Q422 319 452 301T535 318" stroke="#f8f4eb" stroke-width="12" stroke-linecap="round" fill="none"/>
+            <path d="M109 343Q147 310 184 329T253 337Q291 342 316 311T386 310Q422 319 452 301T535 318" stroke="#1b5856" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 7" fill="none"/>
+            <circle cx="109" cy="343" r="10" fill="#123f43" stroke="#fff9ed" stroke-width="5"/>
+            <circle cx="253" cy="337" r="10" fill="#123f43" stroke="#fff9ed" stroke-width="5"/>
+            <circle cx="535" cy="318" r="11" fill="#d77d62" stroke="#fff9ed" stroke-width="5"/>
+            <g fill="#e8e2c8"><path d="M475 433q29-13 48 9l-17 13-27-6Z"/><path d="M341 448q28-20 41-4l-9 13-27 3Z"/><path d="M529 190q18-20 30-7l-6 15-18 5Z"/></g>
+          </g>
+          <g font-family="system-ui, sans-serif" fill="#174b49">
+            <text x="66" y="478" font-size="12" letter-spacing="1.2">AIRPORT</text>
+            <text x="216" y="449" font-size="12" letter-spacing=".8">CHARLOTTE AMALIE</text>
+            <text x="474" y="325" font-size="12" letter-spacing="1.2">RED HOOK</text>
+            <text x="279" y="544" font-size="13" letter-spacing="5" opacity=".65">CARIBBEAN SEA</text>
+          </g>
+          <g transform="translate(550 92)" fill="none" stroke="#174b49" stroke-width="1"><circle r="23"/><path d="M0-31V31M-31 0H31"/><path d="M0-18L5 0 0 18-5 0Z" fill="#174b49"/></g>
+          <text x="545" y="48" font-family="system-ui,sans-serif" fill="#174b49" font-size="11">N</text>
+        </svg>
+        <div class="scene-callout">
+          <span class="callout-icon" aria-hidden="true">&#8599;</span>
+          <div><span class="eyebrow">Touch down. Settle in.</span><p>Your first stop can already be in the plan.</p></div>
+          <button type="button" class="round-button" data-open-service="transfer" aria-label="Plan an airport transfer">&#8594;</button>
+        </div>
+        <p class="map-caption">An island illustration, not live navigation.</p>
+      </div>
+    </section>
+
+    <section class="service-strip" aria-label="Transportation options">
+      <span>AIRPORT &amp; FERRY</span><i aria-hidden="true"></i><span>EVERYDAY RIDES</span><i aria-hidden="true"></i><span>PRIVATE TOURS</span><i aria-hidden="true"></i><span>YOUR WHOLE STAY</span>
+    </section>
+
+    <section id="experiences" class="experiences section-wrap" aria-labelledby="experiences-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">More than the ride there</p><h2 id="experiences-title">What brings you<br><em>to the island?</em></h2></div>
+        <p>Keep it simple for a single trip.<br>Bring it together for something bigger.</p>
+      </div>
+      <div class="experience-grid">
+        <article class="experience-card experience-tour">
+          <div class="experience-art tour-art" aria-hidden="true"><div class="sun-disc"></div><div class="tour-hill hill-back"></div><div class="tour-hill hill-front"></div><span class="art-caption">TAKE THE SCENIC ROUTE</span><span class="art-number">01</span></div>
+          <div class="experience-copy"><span class="eyebrow">Private tours</span><h3>A day that's yours.</h3><p>Choose a route, bring your people, and leave time for the stops you came for.</p><button class="text-button" type="button" data-open-service="tour">Plan a private tour <span aria-hidden="true">&#8599;</span></button></div>
+        </article>
+        <article class="experience-card experience-villa">
+          <div class="experience-art villa-art" aria-hidden="true"><div class="villa-wall"><span></span><span></span></div><div class="villa-pool"></div><span class="art-caption">ARRIVE. UNPACK. GO ENJOY IT.</span><span class="art-number">02</span></div>
+          <div class="experience-copy"><span class="eyebrow">Villa &amp; guesthouse stays</span><h3>Make yourself at home.</h3><p>Different arrivals, dinner out, a beach day. One itinerary for the people staying with you.</p><button class="text-button" type="button" data-open-service="villa">Arrange your stay <span aria-hidden="true">&#8599;</span></button></div>
+        </article>
+        <article class="experience-card experience-wedding">
+          <div class="experience-art wedding-art" aria-hidden="true"><div class="wedding-arch"></div><div class="wedding-line"></div><span class="art-caption">EVERYONE IN THE RIGHT PLACE</span><span class="art-number">03</span></div>
+          <div class="experience-copy"><span class="eyebrow">Weddings &amp; events</span><h3>Your people. All together.</h3><p>Guest pickups, wedding-party arrivals and the ride home. See how each group gets there.</p><button class="text-button" type="button" data-open-service="wedding">Bring the plan together <span aria-hidden="true">&#8599;</span></button></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="plans-feature section-wrap" aria-labelledby="plans-title">
+      <div class="feature-copy">
+        <p class="eyebrow">The details, taken care of</p>
+        <h2 id="plans-title">Less checking in.<br><em>More being here.</em></h2>
+        <p>Know what's confirmed, who's meeting you, and what happens next. If your plans change, keep the conversation with the trip.</p>
+        <ul class="feature-list"><li>Clear pickups, vehicles and guest counts</li><li>A familiar driver, when available</li><li>Changes, messages and payments in one place</li></ul>
+        <button type="button" class="button button-dark" data-action="sample-stay">Explore a sample stay <span aria-hidden="true">&#8599;</span></button>
+      </div>
+      <div class="itinerary-preview" aria-label="Illustrative itinerary">
+        <div class="preview-top"><span class="eyebrow">Your island week</span><span class="pill">Sample itinerary</span></div>
+        <div class="preview-trip"><span class="preview-day">01<small>ARRIVE</small></span><div><h3>Airport to your villa</h3><p>4 guests &middot; Arrival pickup</p></div><span class="preview-status">All in one plan</span></div>
+        <div class="preview-trip"><span class="preview-day">02<small>GO OUT</small></span><div><h3>Dinner in Red Hook</h3><p>6 guests &middot; Return included</p></div><span class="preview-arrow" aria-hidden="true">&#8599;</span></div>
+        <div class="preview-trip"><span class="preview-day">03<small>EXPLORE</small></span><div><h3>A beach day, your way</h3><p>6 guests &middot; Preferred driver requested</p></div><span class="preview-arrow" aria-hidden="true">&#8599;</span></div>
+        <div class="preview-bottom"><span class="small-dot" aria-hidden="true"></span> Each trip has its own confirmation and updates.</div>
+      </div>
+    </section>
+
+    <section class="arrival-note section-wrap">
+      <p class="eyebrow">Start with the first ride</p><h2>Landing soon?</h2>
+      <p>Add your arrival, your luggage and where you're staying.<br>See what a clear pickup arrangement could look like.</p>
+      <button type="button" class="button button-light" data-open-service="transfer">Plan an airport pickup <span aria-hidden="true">&#8599;</span></button>
+      <span class="arrival-coordinate" aria-hidden="true">STT &#8594;</span>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div><a class="wordmark" href="/" aria-label="ETA home">ETA<span aria-hidden="true">.</span></a><p>St. Thomas, U.S. Virgin Islands</p></div>
+    <p class="prototype-note">Service concept. All providers, availability, prices and trip updates in this preview are illustrative. No bookings, messages or payments are sent. Sample plans last only while this page is open.</p>
+    <button class="text-button" type="button" data-action="about-preview">About this preview <span aria-hidden="true">&#8599;</span></button>
+  </footer>
+  <noscript><p class="no-script">The service preview needs JavaScript for sample bookings. No booking or payment can be made from this page.</p></noscript>
+  <datalist id="island-places"><option value="Cyril E. King Airport"><option value="Red Hook ferry terminal"><option value="Charlotte Amalie"><option value="Magens Bay"><option value="Sapphire Beach"><option value="Sample villa, East End"></datalist>
+
+  <dialog id="journey-dialog" class="journey-dialog" aria-labelledby="journey-title">
+    <div class="dialog-top"><a class="wordmark" href="#ride" data-action="close-dialog" aria-label="Close preview and return to ETA">ETA<span aria-hidden="true">.</span></a><span class="demo-mark"><span class="small-dot" aria-hidden="true"></span> Sample journey &middot; nothing is sent</span><button type="button" class="close-button" data-action="close-dialog" aria-label="Close journey preview">&#215;</button></div>
+    <div id="journey-content"><h2 id="journey-title" class="sr-only">Your transportation</h2></div>
+    <p id="journey-feedback" class="journey-feedback" role="status" aria-live="polite"></p>
+  </dialog>
+  <div id="page-status" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

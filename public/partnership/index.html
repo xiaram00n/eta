@@ -1,1 +1,176 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Working on ETA together</title><link rel="stylesheet" href="/assets/style.css"></head><body><header><a href="/">ETA</a><nav></nav></header><main><section class="intro"><h1>Working on this together</h1><p>I’m developing software for existing taxi, limo and tour businesses in St. Thomas. Before deciding what to build, I need to understand how operators work and what they would actually use.</p><p>I’d like your help with that part.</p></section><section class="card"><h2>What I’m proposing</h2><p>You bring your experience as a driver and operator, help me ask the right questions, and introduce me to people willing to share how their businesses work.</p><p>I handle the product design and technical work, organize what we learn, and build examples we can test together.</p><p>There is no upfront cash contribution from you in this discovery arrangement. Let’s agree on the time involved and any expenses before starting.</p></section><section class="card"><h2>What stays with the operator</h2><p>Their business name, customer relationships, vehicles and authority over pricing. The software should fit how they run their business—not require them to hand it over.</p><p>We are not proposing a new transportation carrier or asking you to run a booking desk for us.</p></section><section class="card"><h2>What we need to learn</h2><ul><li>How requests become confirmed, completed and paid bookings.</li><li>Where time or money is lost, and what already works well.</li><li>What guests ask for and where arrangements break down.</li><li>How drivers share work, use radio or messaging, and respect existing relationships.</li><li>Which requirements need checking with the relevant authorities.</li><li>Whether operators would pay for a specific, tested improvement.</li></ul><p>Introductions should be voluntary. We do not need guest names, private customer lists, banking details or copies of licenses.</p></section><section class="card"><h2>A small first step</h2><ol><li>Walk through a recent booking together.</li><li>Invite a small, varied group of operators to answer the questionnaire.</li><li>Review the results and choose one problem to test.</li><li>Try a prototype with willing operators, then decide whether to continue.</li></ol><p>We should agree on your role, time, expenses and how we use information before asking you to do this work.</p></section><section class="card"><h2>What is not agreed yet</h2><p>Ownership, compensation, revenue sharing, decision-making and any longer-term responsibilities are still open. This walkthrough does not settle those terms or promise an equity share.</p><p>We need to agree and document those terms before either of us takes on an ongoing role.</p></section><section class="card"><h2>Try the examples</h2><a class="button" href="/">Guest preview</a><a class="button" href="/questionnaire/">Operator questionnaire</a><p class="small">The guest preview is simulated. The questionnaire sends real research responses when hosted with the existing backend.</p></section></main><footer>ETA · St. Thomas, USVI</footer></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#123f43">
+  <title>ETA | Exploring your idea, together</title>
+  <link rel="stylesheet" href="/assets/partnership.css">
+  <script src="/assets/partnership.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="edition"><span>St. Thomas / U.S. Virgin Islands</span><span>A conversation about working together</span></div>
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="ETA guest preview">ETA<span>.</span></a>
+    <span class="header-note">From the first idea<br>to something we can test.</span>
+    <a class="guest-link" href="/" target="_blank" rel="noopener">See the guest example <span aria-hidden="true">&#8599;</span></a>
+  </header>
+
+  <main id="main">
+    <section class="opening section-width" aria-labelledby="opening-title">
+      <div class="opening-copy">
+        <p class="eyebrow"><span class="rule"></span> Your idea started this</p>
+        <h1 id="opening-title">Let's explore<br>what it could<br><em>become.</em></h1>
+        <p class="opening-lead">You suggested a tourism website. That started a bigger conversation: how could we help your business earn more, while making it easier for guests to get around?</p>
+        <p>Your experience, the examples you shared, and our conversations are shaping this direction. I've put together a working example so we can look at the possibilities together, question them, and decide what is worth testing.</p>
+        <a class="button button-dark" href="#service">Start with one ride <span aria-hidden="true">&#8595;</span></a>
+        <p class="caption">A direction to explore together. Not a finished service or an agreed business arrangement.</p>
+      </div>
+      <aside class="opening-note" aria-labelledby="shared-question">
+        <span class="folio" aria-hidden="true">01 / THE STARTING POINT</span>
+        <p class="eyebrow">The question underneath the website</p>
+        <h2 id="shared-question">What would make<br>a better business?</h2>
+        <div class="question-line"><span>More useful enquiries</span><span aria-hidden="true">+</span></div>
+        <div class="question-line"><span>More trips completed reliably</span><span aria-hidden="true">+</span></div>
+        <div class="question-line"><span>Less time and money lost</span><span aria-hidden="true">=</span></div>
+        <p class="question-result">More value from the work.<br><em>That is what we need to prove.</em></p>
+        <p class="note-small">A website can support that. It cannot guarantee it.</p>
+      </aside>
+    </section>
+
+    <nav class="chapter-nav" aria-label="Walkthrough sections">
+      <div><a href="#service">01 / The service</a><a href="#operators">02 / The operators</a><a href="#reach">03 / Reaching guests</a><a href="#earnings">04 / The money</a><a href="#together">05 / Our roles</a><a href="#first-test">06 / A first test</a></div>
+    </nav>
+
+    <section id="service" class="chapter section-width" aria-labelledby="service-title">
+      <div class="chapter-heading">
+        <p class="eyebrow">01 / What sits behind the screen</p>
+        <h2 id="service-title">A guest can ask online.<br><em>A driver still has to take them there.</em></h2>
+        <p>The website is the front door. The service is everything that makes the request become a dependable ride.</p>
+      </div>
+      <div class="flow-controls" role="group" aria-label="Explore two possible outcomes" hidden>
+        <button type="button" class="flow-button" data-flow="ready" aria-pressed="true" aria-controls="flow-ready">A suitable operator accepts</button>
+        <button type="button" class="flow-button" data-flow="unavailable" aria-pressed="false" aria-controls="flow-unavailable">No suitable operator is available</button>
+      </div>
+      <div id="flow-ready" class="flow-example" role="region" aria-labelledby="ready-title">
+        <div class="example-heading"><span class="example-label">Illustrative ride / not a live request</span><h3 id="ready-title">A clear request becomes a clear arrangement.</h3></div>
+        <ol class="ride-flow">
+          <li><span class="step-number">01</span><h4>The guest asks</h4><p>Pickup, destination, time, guests and luggage. Enough information to know what the job needs.</p><span class="flow-state">A request, not a confirmed ride</span></li>
+          <li><span class="step-number">02</span><h4>An operator checks</h4><p>A participating operator checks the job, vehicle fit, availability and price before accepting it.</p><span class="flow-state">A person commits to the work</span></li>
+          <li><span class="step-number">03</span><h4>The guest knows the plan</h4><p>Who is meeting them, where, when, the agreed price, and how to ask for help if something changes.</p><span class="flow-state">A confirmed arrangement</span></li>
+          <li><span class="step-number">04</span><h4>The ride happens</h4><p>Pickup updates, the trip, payment and any follow-up need to match what was agreed.</p><span class="flow-state">A service delivered</span></li>
+        </ol>
+        <p class="flow-conclusion">The screen helps both sides keep track. The operator's commitment is what makes the ride possible.</p>
+      </div>
+      <div id="flow-unavailable" class="flow-example" role="region" aria-labelledby="unavailable-title" hidden>
+        <div class="example-heading"><span class="example-label">Illustrative exception / not a live request</span><h3 id="unavailable-title">A payment button cannot supply a missing driver.</h3></div>
+        <ol class="ride-flow exception-flow">
+          <li><span class="step-number">01</span><h4>The guest asks</h4><p>The same clear request arrives. The website can collect it, but that is only the first step.</p><span class="flow-state">Request received</span></li>
+          <li><span class="step-number">02</span><h4>Nobody can accept</h4><p>No participating operator can meet the time or vehicle needs. Interest in the job is not the same as availability.</p><span class="flow-state">Not confirmed</span></li>
+          <li><span class="step-number">03</span><h4>Give an honest answer</h4><p>Ask whether another time would work, or explain that the request cannot be fulfilled. Do not promise a ride or take payment as though it is secured.</p><span class="flow-state">Alternative or clear decline</span></li>
+          <li><span class="step-number">04</span><h4>Learn from the gap</h4><p>Was the issue timing, vehicle capacity, coverage, or the way the request reached operators? That helps us choose what to improve.</p><span class="flow-state">A question to investigate</span></li>
+        </ol>
+        <p class="flow-conclusion">This is why operators need to participate before we can promise the service to guests.</p>
+      </div>
+      <p id="flow-status" class="sr-only" role="status" aria-live="polite"></p>
+      <div class="plain-takeaway"><span class="eyebrow">Why your involvement matters</span><p>You know the work and the people doing it. You can help us understand what would make a driver choose to participate, what they could realistically keep updated, and what would make the arrangement useful enough to keep using.</p></div>
+    </section>
+
+    <section id="operators" class="operator-section" aria-labelledby="operators-title">
+      <div class="section-width chapter">
+        <div class="chapter-heading"><p class="eyebrow">02 / A reason to participate</p><h2 id="operators-title">Keep what works.<br><em>Make the difficult parts easier.</em></h2><p>We should not ask operators to change their routine just because a newer system exists. The change needs to solve something that matters to them.</p></div>
+        <div class="operator-columns">
+          <div><span class="column-label">The direction we want to protect</span><h3>Your business remains yours.</h3><ul class="editorial-list"><li>Your business name and existing customer relationships.</li><li>A say in which work you accept and the price you agree.</li><li>Useful relationships with other drivers, associations and referral partners.</li><li>The option to build around methods that already work, rather than replace them all at once.</li></ul></div>
+          <div><span class="column-label">Improvements worth investigating</span><h3>Less uncertainty. Better opportunities.</h3><ul class="editorial-list"><li>Requests with the details needed to judge the job.</li><li>Fewer calls just to establish who is available or where a pickup stands.</li><li>A clearer way to arrange return rides, groups and work shared with other operators.</li><li>A useful presence in front of guests who are looking for the service you actually provide.</li></ul></div>
+        </div>
+        <p class="section-footnote">These are design goals, not verified findings or promised results. We need operators to tell us which problems they actually have, and which of these changes would help.</p>
+        <div class="participation-line"><p class="eyebrow">Participation has to mean something practical</p><p>Agree what work you take. Keep availability accurate enough to rely on. Accept or decline requests. Update important changes. We need to find the simplest way to do that during a real working day.</p><p class="note-small">Who can join, how requests are shared, protection of existing referrals, and any exclusive access or territory remain questions to agree. No exclusivity is promised here.</p></div>
+      </div>
+    </section>
+
+    <section id="reach" class="chapter section-width" aria-labelledby="reach-title">
+      <div class="chapter-heading"><p class="eyebrow">03 / A reason for guests to use it</p><h2 id="reach-title">Being online is a start.<br><em>Being useful is the reason to return.</em></h2><p>We need both sides: operators who can deliver the service, and guests who have a reason to find and choose it.</p></div>
+      <div class="reach-layout">
+        <div class="reach-question"><span class="folio" aria-hidden="true">FIND / CHOOSE / RETURN</span><h3>Which guest?<br>Which need?<br>Why this service?</h3><p>One clearly defined problem is a better starting point than trying to offer everything to every visitor.</p></div>
+        <ol class="reach-steps">
+          <li><span>Find it</span><div><h3>Give the right people a way to discover it.</h3><p>Search and business listings, accommodation referrals, existing contacts, or carefully tested advertising are possible routes. A Google Business Profile is one option to investigate where eligible, not a guarantee of enquiries.</p></div></li>
+          <li><span>Choose it</span><div><h3>Make the benefit easy to understand.</h3><p>A local ride, an arrival pickup, or a return already arranged. Start with a need operators can reliably meet, and explain what is clearer or easier than the alternatives.</p></div></li>
+          <li><span>Use it again</span><div><h3>Deliver what the guest was told to expect.</h3><p>Accurate information and a dependable ride give the guest a reason to come back or recommend it. The website alone cannot create that experience.</p></div></li>
+        </ol>
+      </div>
+      <p class="section-footnote">These are routes to test, not a completed marketing plan. Advertising costs, demand, competing services and the effort needed to win a booking still need checking.</p>
+    </section>
+
+    <section id="earnings" class="earnings-section" aria-labelledby="earnings-title">
+      <div class="section-width chapter">
+        <div class="chapter-heading"><p class="eyebrow">04 / Keep the money clear</p><h2 id="earnings-title">The trip income.<br>The extra work.<br><em>The platform.</em></h2><p>Those are different things. Your existing driving business, a possible coordination role, and the software business should not be treated as one pot of money.</p></div>
+        <div class="income-lines">
+          <div><span class="income-number">01</span><h3>Your driving business</h3><p>You earn from trips you carry out. More completed work, better use of time, or lower costs could help. A new fee on the same work, with no added benefit, would not.</p></div>
+          <div><span class="income-number">02</span><h3>Any additional role you take</h3><p>Introductions, operator coordination or ongoing support could be separate work. Whether you want that role, what it involves and how it is paid would need agreement first.</p></div>
+          <div><span class="income-number">03</span><h3>The platform business</h3><p>The product needs a sustainable way to fund its work and ongoing operation. A booking fee is one model to explore, not a price or arrangement that has been decided.</p></div>
+        </div>
+
+        <div class="money-workbench">
+          <div class="workbench-heading"><div><p class="eyebrow">Work through one possible booking</p><h3>Put your own figures into the idea.</h3></div><span class="draft-stamp">An example, not proposed terms</span></div>
+          <p class="workbench-intro">This example takes a platform fee out of the guest fare. Any coordination payment comes out of that fee, not out of the fare a second time. Other models are possible. No rates, earnings or roles are agreed by using this tool.</p>
+          <form id="earnings-form" novalidate inert>
+            <fieldset id="earnings-fields" disabled>
+              <legend class="sr-only">Enter an illustrative booking in US dollars</legend>
+              <div class="money-form-grid">
+                <label class="wide-field" for="fulfiller">Who carries out this example trip?<select id="fulfiller" name="fulfiller"><option value="you">You</option><option value="another">Another participating operator</option></select></label>
+                <label for="fare">Guest fare <span class="money-input"><span aria-hidden="true">$</span><input id="fare" name="fare" inputmode="decimal" type="text" maxlength="16" required aria-describedby="money-help" autocomplete="off"></span></label>
+                <label for="trip-costs">Trip operating costs <span class="money-input"><span aria-hidden="true">$</span><input id="trip-costs" name="tripCosts" inputmode="decimal" type="text" maxlength="16" required aria-describedby="money-help" autocomplete="off"></span></label>
+                <label for="platform-fee">Platform fee, taken from the fare <span class="money-input"><span aria-hidden="true">$</span><input id="platform-fee" name="platformFee" inputmode="decimal" type="text" maxlength="16" required aria-describedby="money-help" autocomplete="off"></span></label>
+                <label for="coordination-pay">From that fee: your coordination payment <span class="money-input"><span aria-hidden="true">$</span><input id="coordination-pay" name="coordinationPay" inputmode="decimal" type="text" maxlength="16" required aria-describedby="money-help coordination-help" autocomplete="off"></span><span id="coordination-help" class="field-help">Only if a separate role and payment were agreed. Enter 0 to explore no such payment.</span></label>
+                <label class="wide-field" for="platform-costs">Platform operating costs for this booking <span class="money-input"><span aria-hidden="true">$</span><input id="platform-costs" name="platformCosts" inputmode="decimal" type="text" maxlength="16" required aria-describedby="money-help platform-costs-help" autocomplete="off"></span><span id="platform-costs-help" class="field-help">For example, payment handling and support. This is your estimate, not a researched cost.</span></label>
+              </div>
+              <p id="money-help" class="field-help">US dollars, up to two decimal places. Fill every amount, including 0 where intended. Nothing is prefilled or sent anywhere.</p>
+              <p id="money-error" class="form-error" role="alert" hidden></p>
+              <div class="form-actions"><button class="button button-dark" type="submit">See how it adds up <span aria-hidden="true">&#8599;</span></button><button class="text-button" type="reset">Clear the figures</button></div>
+            </fieldset>
+          </form>
+          <noscript><p class="form-error">The calculator needs JavaScript. The rest of this walkthrough can be read without it.</p></noscript>
+          <p id="money-status" class="money-status" role="status" aria-live="polite">No figures assumed. The example is ready when you are.</p>
+          <div id="money-results" class="money-results" hidden>
+            <h4 id="results-title" tabindex="-1">Where this example leaves each side</h4>
+            <p id="booking-role" class="results-note"></p>
+            <div class="result-grid">
+              <div><span class="eyebrow">Your side</span><dl class="result-lines"><div><dt>Your trip contribution</dt><dd id="your-driving"></dd></div><div><dt>Your separate coordination payment</dt><dd id="your-coordination"></dd></div><div class="result-total"><dt>Your combined amount</dt><dd id="your-total"></dd></div></dl></div>
+              <div><span class="eyebrow">The other operator</span><dl class="result-lines"><div><dt>Their trip contribution</dt><dd id="other-driving"></dd></div></dl><p class="results-note">Only applies when another operator carries out the example trip.</p></div>
+              <div><span class="eyebrow">The platform side</span><dl class="result-lines"><div><dt>Fee received</dt><dd id="fee-received"></dd></div><div><dt>Less your coordination payment</dt><dd id="coordination-out"></dd></div><div><dt>Less entered platform costs</dt><dd id="platform-costs-out"></dd></div><div class="result-total"><dt>Amount remaining</dt><dd id="platform-remaining"></dd></div></dl></div>
+            </div>
+            <div class="comparison-note"><h4>Compare the same trip without a platform fee.</h4><p id="fee-comparison"></p><p>The fee only makes business sense if the service brings enough added value: useful additional work, less cost, or time worth saving. We still have to test that. This is one booking, not a forecast of more guests or guaranteed earnings.</p></div>
+            <p class="results-note">Trip contribution = fare minus entered trip costs and the platform fee. These amounts are not take-home profit: taxes and any costs you did not enter are not deducted. The coordination payment also has no separate costs deducted. Actual payment collection, payment timing, refunds and money-handling responsibilities remain undecided.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="together" class="chapter section-width" aria-labelledby="together-title">
+      <div class="chapter-heading"><p class="eyebrow">05 / What each of us brings</p><h2 id="together-title">You know the work.<br><em>I can help make the idea testable.</em></h2><p>You do not need to become the technical person. Your judgement about the work, and your ability to explain what operators need, are central to whether this is useful.</p></div>
+      <div class="roles-layout">
+        <div class="role-column"><span class="column-label">Your side of the exploration</span><h3>Experience, questions<br>and connections.</h3><p>Help us make sense of the working day. Challenge what does not fit. Tell me what you mean, what I have missed, and which questions other operators should answer for themselves.</p><p>If you are comfortable making introductions, help explain the idea accurately and invite voluntary feedback. You are not being asked to promise a finished service, guarantee bookings, or sell it to your colleagues.</p></div>
+        <div class="role-column"><span class="column-label">My side of the exploration</span><h3>Research, structure<br>and a working example.</h3><p>Turn what we learn into clear options. Check what can be verified publicly, design the guest and operator experience, build examples, and explain the practical limits and costs.</p><p>Bring the choices back to you in a form we can discuss. Not decide the business in your name, or assume a technical solution is automatically the right answer.</p></div>
+      </div>
+      <div class="agreement-note"><p class="eyebrow">Agree the work before taking it on</p><p>No upfront cash contribution is proposed from you for this initial exploration. That is not an agreement to unlimited unpaid work from either of us. Time, expenses, responsibilities, compensation, ownership and any continuing role need their own clear agreement.</p></div>
+      <details class="conversation-detail"><summary>A simple way to explain the idea to another operator</summary><blockquote>We're exploring a way to make arranging rides clearer for guests and the operators doing the work. The example shows what might be possible; it is not a service already taking bookings. We'd like to understand how your business works, what you already use, and what would genuinely make the work easier. Your experience will help us judge what is useful and what we should change.</blockquote><p class="note-small">Use this as a starting point for the conversation, not a script that replaces listening.</p></details>
+    </section>
+
+    <section id="first-test" class="research-section" aria-labelledby="test-title">
+      <div class="section-width chapter">
+        <div class="chapter-heading"><p class="eyebrow">06 / Learn enough to choose a small test</p><h2 id="test-title">Start with understanding.<br><em>Not a sales pitch.</em></h2><p>We need to learn what is actually happening before deciding what the service should change. Feedback is useful even when it tells us our idea is wrong.</p></div>
+        <div class="research-columns">
+          <div><span class="column-label">Check what we can ourselves</span><h3>Do the background work.</h3><p>Publicly described services, published fees and rules, guest-facing booking options, and requirements from the relevant authorities can help us ask better questions.</p><p class="note-small">That research has not been completed for this walkthrough. A public rule is not proof of how a particular operator works or what they actually pay.</p></div>
+          <div><span class="column-label">Ask what only operators can tell us</span><h3>Listen to the working reality.</h3><p>Where their work comes from. Which services they use and currently pay for. How often costs arise. How requests are accepted, shared or lost. What keeping availability current would involve. What they wish were easier.</p><p class="note-small">This is not a test of whether they would buy our service. We do not need private customer lists, guest names, account details or copies of personal documents.</p></div>
+        </div>
+        <ol class="test-sequence"><li><span>Listen</span><p>Walk through a recent booking and hear from willing operators with different ways of working.</p></li><li><span>Choose</span><p>Pick one recurring problem, a specific guest need, and a small group able to try a different approach.</p></li><li><span>Agree</span><p>Set the roles, limits, costs, support and permissions before any live trial. Check the requirements that apply.</p></li><li><span>Test &amp; review</span><p>Look at completed trips, failures, operator effort, guest experience and the actual money left after costs. Then decide together whether to continue.</p></li></ol>
+        <div class="decision-close"><div><p class="eyebrow">The next conversation</p><h3>Does this reflect what<br>you had in mind?</h3><p>What fits your experience? What have I misunderstood? What would you want to ask the other operators before we go further?</p></div><a class="button button-light" href="/" target="_blank" rel="noopener">Look at the guest example together <span aria-hidden="true">&#8599;</span></a></div>
+        <p class="questionnaire-note">The operator questionnaire is the next separate revision. The earlier version is not linked here for circulation: it needs to match this research-only approach first.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer section-width"><a class="wordmark" href="/" aria-label="ETA guest preview">ETA<span>.</span></a><p>A shared exploration, based on your original idea.<br>Discussion draft. No commercial terms agreed; no live bookings or payments.</p><a href="#main">Back to the beginning <span aria-hidden="true">&#8593;</span></a></footer>
+</body>
+</html>
