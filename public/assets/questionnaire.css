@@ -1,0 +1,77 @@
+@charset "UTF-8";
+:root{color-scheme:light;--ink:#32172d;--muted:#665361;--paper:#fff8f5;--line:#d9c8d1;--accent:#2457c5;--mango:#ffb000;--peach:#f5d6d0;--white:#fffdfb}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit;text-underline-offset:4px}
+button,input,textarea,select{font:inherit}
+button,a,input,textarea,select{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.skip-link{position:absolute;top:-100px;left:16px;padding:12px;background:var(--white);z-index:5}
+.skip-link:focus{top:12px}
+.edition{display:flex;justify-content:space-between;gap:16px;padding:10px max(24px,calc((100vw - 1100px)/2));background:var(--ink);color:var(--paper);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.site-header,main,footer{width:min(1100px,calc(100% - 64px));margin:auto}
+.site-header{display:flex;justify-content:space-between;align-items:center;padding:25px 0;border-bottom:1px solid var(--line)}
+.wordmark{font-size:34px;font-weight:800;letter-spacing:-.08em;text-decoration:none;line-height:1}
+.wordmark span{color:var(--mango)}
+.header-note{font-size:12px;line-height:1.5;text-align:right}
+.intro{max-width:780px;padding:65px 0 42px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+h1{font-size:clamp(54px,8vw,90px);line-height:1.02;letter-spacing:-.055em;margin:24px 0 30px}
+h1 em,h2 em{font-weight:400;color:var(--accent)}
+.lead{font-size:22px;line-height:1.5}
+.intro>p:not(.eyebrow){max-width:710px}
+.shared-interest{font-family:Georgia,"Times New Roman",serif;font-size:24px;border-left:3px solid var(--accent);padding-left:22px;margin:26px 0}
+.invitation{background:var(--peach);padding:24px 28px;margin-top:30px}
+.invitation p{margin:10px 0 0}
+.privacy-note,.progress-help,.field-help,.review-note{font-size:13px;color:var(--muted)}
+.privacy-note{margin-top:20px}
+.workspace{max-width:850px;padding-bottom:30px}
+.progress-top{display:flex;align-items:center;justify-content:space-between;gap:15px}
+#step{font-size:12px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;margin:0}
+progress{display:block;width:100%;height:6px;border:0;border-radius:0;background:var(--line);accent-color:var(--accent);margin:10px 0}
+progress::-webkit-progress-bar{background:var(--line)}
+progress::-webkit-progress-value{background:var(--accent)}
+progress::-moz-progress-bar{background:var(--accent)}
+.progress-help{margin:8px 0 30px}
+h2{font-size:clamp(32px,5vw,47px);line-height:1.15;letter-spacing:-.035em;margin:12px 0 20px}
+.purpose{font-size:20px;line-height:1.5;max-width:730px}
+.section-note{font-size:14px;color:var(--muted);max-width:740px}
+.question{border:0;border-top:1px solid var(--line);padding:26px 0 16px;margin:22px 0;min-width:0}
+.question legend{float:left;width:100%;padding:0;margin:0 0 12px;font-size:18px;font-weight:650;line-height:1.45}
+.question legend+*{clear:both}
+.field-help{margin:0 0 14px;max-width:680px}
+.choice{display:flex;align-items:flex-start;gap:12px;padding:12px 15px;margin:8px 0;border:1px solid #92768a;background:var(--white);cursor:pointer;line-height:1.45}
+.choice:has(input:checked){border-color:var(--accent);background:#e9eefb}
+input[type=radio],input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin:2px 0 0;accent-color:var(--accent)}
+input:not([type=checkbox]):not([type=radio]),textarea,select{display:block;width:100%;min-height:48px;padding:12px;border:1px solid #92768a;border-radius:0;background:var(--white);color:var(--ink)}
+textarea{min-height:115px;resize:vertical}
+label.input-label{display:block;font-size:14px;font-weight:600;margin:15px 0 8px}
+.field-error{font-size:14px;color:#8e3023;margin:10px 0}
+[aria-invalid=true]{border-color:#8e3023!important}
+.controls,.review-actions{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding-top:25px;margin-top:30px;flex-wrap:wrap}
+.button{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:12px 25px;border:1px solid var(--accent);border-radius:0;font-weight:650;cursor:pointer}
+.button-dark{background:var(--accent);color:var(--white)}
+.button-dark:hover:not(:disabled){background:var(--ink);border-color:var(--ink)}
+.button-outline{background:transparent;color:var(--accent)}
+.button-outline:hover:not(:disabled){background:var(--peach)}
+.button:disabled,.text-button:disabled{opacity:.5;cursor:default}
+.text-button{border:0;background:transparent;color:var(--accent);text-decoration:underline;text-underline-offset:4px;font-size:13px;padding:12px 0;cursor:pointer}
+.notice{max-width:850px;padding:18px 22px;background:#fbeae7;border-left:3px solid var(--accent);margin:20px 0;overflow-wrap:anywhere}
+.notice.error{border-color:#8e3023;color:#8e3023;background:#f5e6dd}
+.review-card{padding:24px;background:var(--white);border:1px solid var(--line);margin:20px 0}
+.review-card h3{font-size:26px;margin:0 0 20px}
+dl{margin:0}
+dt{font-weight:650;margin-top:20px;line-height:1.5}
+dt:first-child{margin-top:0}
+dd{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.follow-up{border-top:3px solid var(--accent);margin-top:38px;padding-top:24px}
+.follow-up h3{font-size:30px;margin-bottom:12px}
+.confirmation{padding:35px;background:var(--peach)}
+footer{display:flex;gap:35px;align-items:flex-start;border-top:1px solid var(--line);padding:30px 0 45px;margin-top:45px}
+footer p{font-size:12px;color:var(--muted)}
+@media(max-width:600px){.site-header,main,footer{width:calc(100% - 36px)}.edition{padding:10px 18px;font-size:9px;letter-spacing:.06em}.intro{padding-top:40px}.lead{font-size:19px}.shared-interest{font-size:22px}.invitation{padding:20px}.purpose{font-size:18px}.review-card{padding:18px}.controls .button,.review-actions .button{flex:1;padding:12px 15px}footer{gap:25px}.header-note{font-size:11px}}
+@media(prefers-reduced-motion:no-preference){button,.choice{transition:background-color .15s ease}}
+@media print{.edition,.site-header,.controls,.review-actions,.progress-top,.progress-help,progress,.text-button,footer{display:none!important}body{background:white;color:black;font-size:12pt}.intro{padding-top:0}h1{font-size:38pt}.review-card,.question{break-inside:avoid}.choice{background:white}}

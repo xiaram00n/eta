@@ -1,1 +1,49 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>About your business</title><link rel="stylesheet" href="/assets/style.css"></head><body><header><a href="/">ETA</a><nav></nav></header><main><section class="intro"><h1>About your business</h1><p>We’re working on better ways to handle bookings and guest transportation in St. Thomas. We’d like to understand what works for you, what takes up your time, and what affects your earnings.</p><p>Your answers will help us decide what needs fixing.</p><p class="small">You can leave any question blank and take part without giving your name.</p></section><div id="test" class="notice hidden">Test response — excluded from research when test filtering is enabled.</div><div class="steps"><p id="step" aria-live="polite"></p><button id="clear" class="secondary">Clear draft</button></div><progress id="progress" value="0" max="6" aria-label="Questionnaire progress"></progress><form id="survey"><div id="questions"></div><div id="controls"><button id="back" type="button" class="secondary">Back</button><button id="next" type="button">Next</button></div></form><div id="status" role="status" aria-live="polite"></div></main><footer>ETA · St. Thomas, USVI</footer><script src="/assets/questionnaire.js" defer></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#32172d">
+  <title>ETA | Your experience shapes what comes next</title>
+  <link rel="stylesheet" href="/assets/questionnaire.css">
+  <script src="/assets/questionnaire.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to questionnaire</a>
+  <div class="edition"><span>St. Thomas / U.S. Virgin Islands</span><span>Operator research</span></div>
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="ETA home">ETA<span>.</span></a>
+    <span class="header-note">Better work starts<br>with understanding yours.</span>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="intro-title">
+      <p class="eyebrow">Your experience. A shared opportunity.</p>
+      <h1 id="intro-title">Earn more.<br><em>Keep more of it.</em></h1>
+      <p class="lead">We want to help you earn more from the work you already do, and keep more of what you earn.</p>
+      <p>We've developed a working example. Now we need your experience to understand where a different approach could genuinely help, and what already works well enough to leave alone.</p>
+      <p>Driving guests and showing them around island is what <strong><em>you</em></strong> do best. Building efficient systems that make work easier and more reliable is what <strong><em>we</em></strong> do best.</p>
+      <p class="shared-interest">A real opportunity becomes a shared interest when the success of one strengthens the other.</p>
+      <div class="invitation"><span class="eyebrow">Help shape what comes next</span><p>Eight short sections, with fewer questions where they do not apply. Every research question is optional. Estimates and "not sure" are useful answers. No name or financial records needed.</p></div>
+      <p class="privacy-note">Draft answers stay in this browser on this device until you clear them or a submission is confirmed. Only select "Submit answers" when you are ready to send them to ETA. On a shared device, clear your draft when finished.</p>
+    </section>
+    <div id="test" class="notice" hidden>Test response: marked as test data, not an ordinary research response.</div>
+    <div id="draft-notice" class="notice" role="status" hidden></div>
+    <section id="workspace" class="workspace" aria-label="Operator questionnaire" hidden>
+      <div class="progress-top"><p id="step"></p><button id="clear" class="text-button" type="button">Clear draft</button></div>
+      <progress id="progress" value="0" max="8" aria-label="Section progress"></progress>
+      <p class="progress-help">Progress follows sections, not the number of questions answered.</p>
+      <form id="survey" novalidate>
+        <div id="questions"></div>
+        <div id="controls" class="controls">
+          <button id="back" class="button button-outline" type="button">Back</button>
+          <button id="next" class="button button-dark" type="button">Continue</button>
+        </div>
+      </form>
+    </section>
+    <div id="status" class="notice" role="status" aria-live="polite" hidden></div>
+    <noscript><p class="notice error">The questionnaire needs JavaScript to display questions and save your answers. No response has been sent.</p></noscript>
+  </main>
+  <footer><a class="wordmark" href="/" aria-label="ETA home">ETA<span>.</span></a><p>A useful service starts with your working reality.<br>Research, not a promise of bookings or earnings.</p></footer>
+</body>
+</html>
