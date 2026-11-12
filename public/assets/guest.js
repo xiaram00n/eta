@@ -20,7 +20,7 @@
   const PHASE_LABELS = {
     requested: "Request prepared", held: "Sample capacity held", confirmed: "Confirmed",
     enroute: "On the way", arrived: "At your pickup", inprogress: "On your way",
-    completed: "Completed", attention: "Needs attention", cancelled: "Cancelled"
+    completed: "Completed", attention: "Needs attention", cancelled: "Canceled"
   };
   const SEATS = 8;
   const HOLD_MS = 5 * 60 * 1000;
@@ -382,17 +382,17 @@
 
     cancel(id) {
       const plan = this.get(id);
-      requireValue(["requested", "held", "confirmed"].includes(plan.status), "Only an unstarted sample plan can be cancelled here.");
+      requireValue(["requested", "held", "confirmed"].includes(plan.status), "Only an unstarted sample plan can be canceled here.");
       plan.status = "cancelled"; plan.issue = null; plan.change = null;
       plan.legs.forEach(leg => { leg.phase = "cancelled"; leg.accepted = false; leg.vehicles = 0; leg.vehicleIds = []; });
       if (plan.payment.paid > 0) plan.payment.status = "refund_review";
-      plan.history.push("Sample plan cancelled. Refund eligibility still requires review.");
+      plan.history.push("Sample plan canceled. Refund eligibility still requires review.");
       return plan;
     }
 
     refund(id, complete = false) {
       const plan = this.get(id);
-      requireValue(plan.status === "cancelled" && plan.payment.paid > 0, "A paid, cancelled sample plan is needed for a refund.");
+      requireValue(plan.status === "cancelled" && plan.payment.paid > 0, "A paid, canceled sample plan is needed for a refund.");
       if (complete) {
         requireValue(plan.payment.status === "refund_pending", "Request a sample refund before completing it.");
         plan.payment.refunded = plan.payment.paid;
@@ -806,7 +806,7 @@
       const target = document.querySelector(".trip-layout > section");
       const section = document.createElement("section");
       section.className = "info-panel warning";
-      section.innerHTML = `<h3>Cancel this sample plan?</h3><p>No real reservation exists. In this example, cancelling releases the sample capacity. Any paid amount enters refund review, not an automatic refund. Actual cancellation terms have not been set.</p>${button("cancel-plan", "Cancel sample plan")}${button("itinerary", "Keep the plan")}`;
+      section.innerHTML = `<h3>Cancel this sample plan?</h3><p>No real reservation exists. In this example, canceling releases the sample capacity. Any paid amount enters refund review, not an automatic refund. Actual cancellation terms have not been set.</p>${button("cancel-plan", "Cancel sample plan")}${button("itinerary", "Keep the plan")}`;
       target.prepend(section); section.scrollIntoView({ block: "nearest" }); return;
     } else if (action === "cancel-plan") {
       demo.cancel(plan.id); activeTab = "payments";

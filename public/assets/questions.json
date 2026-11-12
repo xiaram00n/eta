@@ -3,11 +3,19 @@
     "id": "setup",
     "title": "Your working setup",
     "purpose": "Understanding whose work these answers describe helps us avoid designing around the wrong kind of business.",
+    "pages": ["Your work", "Your arrangements", "Your medallion lease", "The bookings you can serve"],
     "questions": [
-      {"id":"working_roles","title":"Which roles do you handle?","kind":"multi","help":"Choose all that apply.","options":["independent|Drive independently","owner|Own or manage vehicles","lease|Lease a vehicle or operating rights","employee|Drive for someone else","dispatcher|Coordinate bookings or drivers","other|Other"]},
-      {"id":"scope","title":"Whose work will your answers describe?","kind":"single","options":["driver|My own work","vehicle|One vehicle","business|A business with several vehicles","dispatch|A booking or dispatch operation"]},
-      {"id":"services_selected","title":"Which transportation services do you provide?","kind":"multi","help":"Choose all that apply.","options":["taxi|Local rides","transfer|Airport or ferry transfers","tour|Private tours","villa|Transportation during guest stays","wedding|Weddings or events","reserved|Reserved or hourly driving","other|Other"]},
-      {"id":"vehicles","title":"How many working vehicles do these answers cover?","kind":"single","show":{"scope":["vehicle","business","dispatch"]},"options":["1|1","2-3|2-3","4-9|4-9","10+|10 or more","unknown|Not sure"]}
+      {"id":"scope","page":0,"title":"Whose work will your answers describe?","kind":"single","options":["driver|My own work","vehicle|One vehicle","business|A business with several vehicles","dispatch|A booking or dispatch operation"]},
+      {"id":"working_vehicle_count","page":0,"title":"How many working vehicles does that work involve?","kind":"single","options":["1|1","2-3|2-3","4-9|4-9","10+|10 or more","unknown|Not sure"]},
+      {"id":"services_selected","page":0,"title":"Which transportation services do you provide?","kind":"multi","help":"Choose all that apply.","options":["taxi|Local rides","transfer|Airport or ferry transfers","tour|Private tours","villa|Transportation during guest stays","wedding|Weddings or events","reserved|Reserved or hourly driving","other|Other"]},
+      {"id":"vehicle_arrangement","page":0,"title":"Are those vehicles owned, leased, or a combination?","kind":"single","options":["owned|Owned","leased|Leased","both|A combination of owned and leased","other|Another arrangement","unknown|Not sure"]},
+      {"id":"medallion_arrangement","page":1,"title":"What medallion arrangement applies to that work?","kind":"single","options":["owned|Owned medallion(s)","leased|Leased medallion(s)","both|A combination of owned and leased medallions","other|Another arrangement","unknown|Not sure"]},
+      {"id":"association_affiliation","page":1,"title":"Do you work through a taxi association or co-op?","kind":"single","options":["yes|Yes","no|No","other|Another arrangement","unknown|Not sure"]},
+      {"id":"booking_authority","page":1,"title":"Who can accept a booking and commit the driver and vehicle?","kind":"single","options":["self|I can","another|Another person","joint|We need joint approval","varies|It depends on the arrangement","unknown|Not sure"]},
+      {"id":"medallion_lease_duration","page":2,"title":"How long is your current medallion lease?","kind":"short","help":"For example, six months, a year, or an ongoing arrangement. An estimate is fine. If you lease more than one medallion, focus on the main arrangement for both questions.","show":{"medallion_arrangement":["leased","both"]}},
+      {"id":"medallion_consecutive_leases","page":2,"title":"How many consecutive medallion leases have you held, including your current lease?","kind":"count","inputLabel":"Number of consecutive medallion leases","help":"Use the same medallion arrangement as above. An estimate or \"Not tracked / not sure\" is fine.","show":{"medallion_arrangement":["leased","both"]}},
+      {"id":"service_formats","introduced":"2.2.0","page":3,"title":"Which kinds of bookings do you actually fulfill?","kind":"multi","help":"Choose all that apply. These can overlap: a scheduled pickup may also reserve a private vehicle.","options":["shared|Seats in shared transportation","private|An exclusive vehicle for one party","scheduled|Scheduled transfers","tour_event|Tours or event vehicle commitments","other|Other","unknown|Not sure"]},
+      {"id":"pickup_arrangements","introduced":"2.2.0","page":3,"title":"Which pickup locations can you serve, and under what arrangements?","kind":"text","help":"For example, prearranged airport or ferry pickups, walk-up queues, hotel pickups, or drop-offs only. Mention any association or access conditions you work under, or what you are unsure about. Do not send permits or documents; this is discovery, not legal clearance."}
     ]
   },
   {
@@ -16,8 +24,8 @@
     "purpose": "Knowing how guests find and contact you helps us distinguish a need for more visibility from a need for easier booking.",
     "questions": [
       {"id":"discovery_sources","title":"How do new guests usually discover your business?","kind":"multi3","help":"Choose up to three. Think about how they find you, not how they send their message.","options":["referrals|Recommendations or referrals","property|Accommodation staff","drivers|Other drivers or dispatch","stand|Taxi stands or passing trade","search|Search or maps","social|Social media","platform|Booking platforms","planner|Wedding or event planners","other|Other","unknown|Not sure"]},
-      {"id":"enquiry_channels","title":"How do booking enquiries usually reach you?","kind":"multi","options":["phone|Calls","messages|Messages or WhatsApp","email|Email","form|Website form","online|Online booking system","dispatch|Dispatcher","person|In person","other|Other"]},
-      {"id":"recent_booking","title":"Think of a recent booking: how did it go from the first enquiry to a confirmed arrangement?","kind":"text","help":"A brief account is enough, including what worked well. Please leave out guest names and contact details."}
+      {"id":"enquiry_channels","title":"How do booking inquiries usually reach you?","kind":"multi","help":"Choose all that apply.","options":["phone|Calls","messages|Messages or WhatsApp","email|Email","form|Website form","online|Online booking system","dispatch|Dispatcher","person|In person","other|Other"]},
+      {"id":"recent_booking","title":"Think of a recent booking: how did it go from the first inquiry to a confirmed arrangement?","kind":"text","help":"A brief account is enough, including what worked well. Please leave out guest names and contact details."}
     ]
   },
   {
@@ -39,11 +47,11 @@
     "id": "service-value",
     "title": "What it costs and brings back",
     "purpose": "Understanding both the cost and the return helps us judge what would make a different service worthwhile, not simply add another expense.",
-    "show": {"service_use":["current_recent","former_recent"]},
-    "skipNote": "Based on your earlier answer, there is no recently used service to describe here. Continue to the next section, or go back if you would like to change that answer.",
+    "show": {"service_use":["current_recent","current_notrecent","former_recent"]},
+    "skipNote": "Based on your earlier answer, there is no current or recently used service to describe here. Continue to the next section, or go back if you would like to change that answer.",
     "note": "All figures are optional. Use the same service and the last 30 days throughout. Estimates are welcome. These figures describe associated work, not proof that the service created every booking.",
     "questions": [
-      {"id":"existing_charge_basis","title":"How does that service charge you?","kind":"multi","options":["free|It is free","subscription|Monthly or annual charge","booking|Fixed fee per booking","percentage|Percentage of bookings","equipment|Equipment or access charges","bundled|Included in another payment","other|Other","unknown|Not sure"]},
+      {"id":"existing_charge_basis","title":"How does that service charge you?","kind":"multi","help":"Choose all that apply. Choose \"It is free\" or \"Not sure\" on its own.","options":["free|It is free","subscription|Monthly or annual charge","booking|Fixed fee per booking","percentage|Percentage of bookings","equipment|Equipment or access charges","bundled|Included in another payment","other|Other","unknown|Not sure"]},
       {"id":"existing_spend_30d","title":"Over the last 30 days, about how much did you pay that service?","kind":"money","help":"USD. Include fees deducted before payment reached you. Enter 0 if no payment fell in this period; annual or bundled charges may make that different from the ongoing cost."},
       {"id":"existing_bookings_30d","title":"About how many completed bookings came through that service in those 30 days?","kind":"count","help":"Count bookings, not individual passengers. Choose \"Not tracked / not sure\" if you cannot estimate."},
       {"id":"existing_receipts_30d","title":"About how much guest payment did those bookings bring in, before costs and service deductions?","kind":"money","help":"USD. Exclude money belonging to other operators. This is not a profit figure."}
@@ -53,11 +61,15 @@
     "id": "working-day",
     "title": "The work around the driving",
     "purpose": "A booking service should reduce unnecessary work, not give you another system to look after.",
+    "pages": ["The work around the driving", "Keeping commitments clear"],
     "questions": [
-      {"id":"request_handlers","title":"Who normally handles booking enquiries while you are driving?","kind":"multi","options":["self|I do, when available","person|Another person","office|Dispatcher or office","online|An online system","wait|Enquiries wait until I am available","varies|It varies"]},
-      {"id":"admin_tasks","title":"Which non-driving tasks take the most effort?","kind":"multi3","help":"Choose up to three.","options":["enquiries|Answering enquiries","quotes|Giving prices","details|Collecting trip details","schedule|Scheduling","drivers|Arranging other drivers","changes|Handling changes","payment|Payments or receipts","followup|Following up","other|Other","none|Nothing takes much effort"]},
-      {"id":"admin_time_daily","title":"On a typical working day, how much of your own time goes into those tasks?","kind":"single","options":["none|None","under30|Under 30 minutes","30-60|30-60 minutes","1-2h|1-2 hours","over2h|More than two hours","varies|Varies too much to estimate","unknown|Not sure"]},
-      {"id":"tools_used","title":"What do you use to keep arrangements organised?","kind":"multi","options":["memory|Memory","paper|Paper or a diary","messages|Messages","calendar|Calendar","dispatch|Dispatcher","software|Booking software","other|Other"]}
+      {"id":"request_handlers","page":0,"title":"Who normally handles booking inquiries while you are driving?","kind":"multi","help":"Choose all that apply.","options":["self|I do, when available","person|Another person","office|Dispatcher or office","online|An online system","wait|Inquiries wait until I am available","varies|It varies"]},
+      {"id":"admin_tasks","page":0,"title":"Which non-driving tasks take the most effort?","kind":"multi3","help":"Choose up to three. Choose \"Nothing takes much effort\" on its own.","options":["enquiries|Answering inquiries","quotes|Giving prices","details|Collecting trip details","schedule|Scheduling","drivers|Arranging other drivers","changes|Handling changes","payment|Payments or receipts","followup|Following up","other|Other","none|Nothing takes much effort"]},
+      {"id":"admin_time_daily","page":0,"title":"On a typical working day, how much of your own time goes into those tasks?","kind":"single","options":["none|None","under30|Under 30 minutes","30-60|30-60 minutes","1-2h|1-2 hours","over2h|More than two hours","varies|Varies too much to estimate","unknown|Not sure"]},
+      {"id":"tools_used","page":0,"title":"What do you use to keep arrangements organized?","kind":"multi","help":"Choose all that apply.","options":["memory|Memory","paper|Paper or a diary","messages|Messages","calendar|Calendar","dispatch|Dispatcher","software|Booking software","other|Other"]},
+      {"id":"commitment_stage","introduced":"2.2.0","page":1,"title":"When you confirm a booking to a guest, what is already committed?","kind":"single","options":["driver_vehicle|A particular driver and suitable vehicle","driver|A driver, with the vehicle still to be assigned","later|The driver and vehicle are arranged later","varies|It depends on the booking","unknown|Not sure"]},
+      {"id":"outside_booking_updates","introduced":"2.2.0","page":1,"title":"How do you keep availability accurate when bookings arrive through different channels?","kind":"text","help":"For example, calls, WhatsApp, an association, or another booking service. What gets updated, and by whom? A brief description of your current process is enough."},
+      {"id":"booking_recovery","introduced":"2.2.0","page":1,"title":"Who handles things when a pickup or booking goes wrong?","kind":"text","help":"For example, finding a replacement driver, updating the guest, handling a no-show or complaint, or arranging a refund. Describe what happens now, not what you think ETA should promise."}
     ]
   },
   {
@@ -65,31 +77,38 @@
     "title": "Work you could take",
     "purpose": "We need to distinguish opportunities a better process could recover from work you could not, or would not, want to take.",
     "questions": [
-      {"id":"suitable_lost_30d","title":"In the last 30 days, about how many suitable enquiries failed to become completed work?","kind":"single","help":"Think of jobs you wanted and could reasonably have served, not work you deliberately chose to decline.","options":["0|None","1-5|1-5","6-15|6-15","16+|More than 15","unknown|Not tracked / not sure"]},
+      {"id":"suitable_lost_30d","title":"In the last 30 days, about how many suitable inquiries failed to become completed work?","kind":"single","help":"Think of jobs you wanted and could reasonably have served, not work you deliberately chose to decline.","options":["0|None","1-5|1-5","6-15|6-15","16+|More than 15","unknown|Not tracked / not sure"]},
       {"id":"suitable_lost_reasons","title":"What mainly prevented those jobs from going ahead?","kind":"multi3","help":"Choose up to three.","show":{"suitable_lost_30d":["1-5","6-15","16+","unknown"]},"options":["response|Delayed response","guest|Guest stopped responding","price|Price","cancel|Cancellation or no-show","payment|Payment","details|Unclear or changing arrangements","other|Other","unknown|Not sure"]},
-      {"id":"capacity_limits","title":"What limits your ability to take additional work you would want?","kind":"multi3","help":"Choose up to three.","options":["demand|Too few enquiries","booked|Existing bookings","vehicle|Vehicle or driver availability","travel|Travel between jobs","rules|Operating restrictions","hours|My chosen working hours","other|Other","none|Nothing"]},
+      {"id":"capacity_limits","title":"What limits your ability to take additional work you would want?","kind":"multi3","help":"Choose up to three. Choose \"Nothing\" on its own.","options":["demand|Too few inquiries","booked|Existing bookings","vehicle|Vehicle or driver availability","travel|Travel between jobs","rules|Operating restrictions","hours|My chosen working hours","other|Other","none|Nothing"]},
       {"id":"spare_capacity_detail","title":"When, if ever, would additional work be useful?","kind":"text","help":"A brief description is enough. \"I do not want additional work\" is a useful answer too."}
     ]
   },
   {
     "id": "business-figures",
     "title": "What remains after expenses",
-    "purpose": "More bookings only help if the extra work is worthwhile. These optional figures help us understand that distinction.",
-    "note": "Use the same person, vehicle or business you described at the start, and the last 30 days. These are rough cash-flow figures, not take-home profit. Please do not send financial records or documents.",
+    "purpose": "We want to understand what work brings in, where money already goes, and which expenses a different approach could replace or make more productive.",
+    "note": "Use the same person, vehicle or business you described at the start, and the last 30 days. All figures are optional; estimates are welcome. Receipts minus reported expenses is a rough cash-flow return, not verified net profit. Annual bills, one-time costs and unpaid work can make that figure unrepresentative. Please do not send financial records or documents.",
+    "pages": ["The work you completed", "What you receive and spend"],
     "questions": [
-      {"id":"month_context","title":"Were the last 30 days quiet, typical or busy for your business?","kind":"single","options":["quiet|Quiet","typical|Typical","busy|Busy","unknown|Not sure"]},
-      {"id":"business_receipts_30d","title":"Approximately how much did you collect for that work during those 30 days, before business costs or booking-service deductions?","kind":"money","help":"USD. Exclude money belonging to other operators. Include service deductions when estimating the amount before costs."},
-      {"id":"business_expenses_30d","title":"Approximately how much did you pay in business expenses during those 30 days?","kind":"money","help":"USD. Include service costs already reported; do not add them a second time. Exclude money simply passed to other operators. Annual or unusually large payments may make this period unrepresentative."}
+      {"id":"month_context","page":0,"title":"Were the last 30 days quiet, typical or busy for your business?","kind":"single","options":["quiet|Quiet","typical|Typical","busy|Busy","unknown|Not sure"]},
+      {"id":"completed_bookings_30d","introduced":"2.2.0","page":0,"title":"About how many bookings did you complete in those 30 days?","kind":"count","help":"Use the same reporting scope as your other figures. Count completed bookings, not inquiries, cancellations, or individual passengers. An estimate or \"Not tracked / not sure\" is fine."},
+      {"id":"booking_mix_30d","introduced":"2.2.0","page":0,"title":"How was that completed work split by booking type?","kind":"text","help":"For example: local rides, airport or ferry transfers, tours, stays, or events. Give approximate counts where you can. For per-person services, include paying passenger numbers; for vehicle-priced services, include vehicle bookings. Distinguish shared seats from private vehicles, and do not count the same booking twice. No price list is needed."},
+      {"id":"business_receipts_30d","page":1,"title":"Approximately how much did you collect for that work during those 30 days, before business costs or booking-service deductions?","kind":"money","help":"USD. Actual collections help us check any later revenue model. Exclude money belonging to other operators. Include service deductions when estimating the amount before costs."},
+      {"id":"business_expenses_30d","page":1,"title":"Approximately how much did you pay in business expenses during those 30 days?","kind":"money","help":"USD. Include service costs already reported; do not add them a second time. Exclude money simply passed to other operators. Annual or unusually large payments may make this period unrepresentative."},
+      {"id":"operating_cost_details","introduced":"2.2.0","page":1,"title":"What do you pay for, how much, and how often?","kind":"text","help":"List expenses separately: what each payment covers, the approximate amount, and its frequency (for example, weekly, monthly, annually, per trip, or one-time). Include whom you pay only if useful; no account details or private names. Consider fuel, maintenance, vehicle or medallion leases, insurance, permits or access, dispatch/booking services, marketing, financing, and paid administrative help. Identify costs shared with other work. Include previously reported service fees here for context, but count them only once in the 30-day total. Your own unpaid administrative time is recorded separately."}
     ]
   },
   {
     "id": "priorities",
     "title": "What would make a difference",
     "purpose": "Your priorities help us choose what deserves building, and what must not be disrupted.",
+    "pages": ["What would make a difference", "Anything we missed?"],
     "questions": [
-      {"id":"main_priority","title":"Which improvement would make the biggest practical difference to your business?","kind":"single","options":["bookings|Better-suited bookings","admin|Less administration","reliability|Fewer failed arrangements","payment|Easier payment","coordination|Better coordination","repeat|Stronger repeat business","other|Other","none|No change needed"]},
-      {"id":"preserve","title":"What must a different approach preserve for you?","kind":"multi3","help":"Choose up to three.","options":["drivers|Trusted driver relationships","guests|Existing guests","choice|Choice of work","communication|Familiar communication methods","availability|Control over availability","other|Other","unknown|Not sure"]},
-      {"id":"improvement_detail","title":"What have we misunderstood or not asked?","kind":"text","help":"Include anything important about your work or local arrangements that our questions missed."}
+      {"id":"main_priority","page":0,"title":"Which improvement would make the biggest practical difference to your business?","kind":"single","options":["bookings|Better-suited bookings","admin|Less administration","reliability|Fewer failed arrangements","payment|Easier payment","coordination|Better coordination","repeat|Stronger repeat business","other|Other","none|No change needed"]},
+      {"id":"preserve","page":0,"title":"What must a different approach preserve for you?","kind":"multi3","help":"Choose up to three. Choose \"Not sure\" on its own.","options":["drivers|Trusted driver relationships","guests|Existing guests","choice|Choice of work","communication|Familiar communication methods","availability|Control over availability","customer_data|Control over customer information","sharing|Deciding when work is shared","other|Other","unknown|Not sure"]},
+      {"id":"booking_control","introduced":"2.2.0","page":0,"title":"Which booking arrangement, if any, would be useful to you?","kind":"single","options":["private|Tools for my own bookings only","overflow|Sharing work only when I choose","both|Both","neither|Neither","unknown|Not sure"]},
+      {"id":"replace_existing_work","introduced":"2.2.0","page":0,"title":"Which existing task or expense would a different system need to replace or make more worthwhile?","kind":"text","help":"Name a current task, payment, or duplicated effort. What would need to stop, cost less, or produce a better result? We want to understand how existing spending could work better, not assume you want another bill."},
+      {"id":"improvement_detail","page":1,"title":"What have we misunderstood or not asked?","kind":"text","help":"Include anything important about your work or local arrangements that our questions missed."}
     ]
   }
 ]

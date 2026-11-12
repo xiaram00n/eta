@@ -18,8 +18,15 @@ function question(id) {
 function answered() {
   return {
     scope: 'business',
-    working_roles: ['independent', 'owner'],
-    vehicles: '2-3',
+    working_vehicle_count: '2-3',
+    vehicle_arrangement: 'owned',
+    medallion_arrangement: 'leased',
+    association_affiliation: 'yes',
+    booking_authority: 'self',
+    medallion_lease_duration: 'One year',
+    medallion_consecutive_leases: { status: 'value', value: '3' },
+    service_formats: ['private', 'scheduled'],
+    pickup_arrangements: 'Prearranged hotel pickups; terminal access needs checking.',
     services_selected: ['taxi', 'transfer'],
     service_use: 'current_recent',
     service_name: 'Example booking service',
@@ -29,32 +36,86 @@ function answered() {
     existing_spend_30d: { status: 'value', value: '40.50' },
     existing_bookings_30d: { status: 'value', value: '8' },
     existing_receipts_30d: { status: 'value', value: '500' },
+    commitment_stage: 'driver_vehicle',
+    outside_booking_updates: 'One person updates our shared calendar.',
+    booking_recovery: 'Our coordinator contacts a backup and updates the guest.',
     suitable_lost_30d: '1-5',
     suitable_lost_reasons: ['response'],
     month_context: 'typical',
+    completed_bookings_30d: { status: 'value', value: '20' },
+    booking_mix_30d: '12 local vehicle bookings; 8 private transfers.',
     business_receipts_30d: { status: 'value', value: '1,200.00' },
-    business_expenses_30d: { status: 'value', value: '650' }
+    business_expenses_30d: { status: 'value', value: '650' },
+    operating_cost_details: 'Fuel about $100 weekly; insurance $1,200 annually; booking fees $40.50 this month, already in the total.',
+    booking_control: 'both',
+    replace_existing_work: 'Replace duplicated calendar updates and improve the return on existing listing costs.'
   };
 }
 
-test('all paths use eight purpose-led sections and at most four visible prompts per section', () => {
+test('all paths use eight purpose-led sections, at most four prompts per page and 44 overall', () => {
   const states = ['current_recent', 'current_notrecent', 'former_recent', 'former', 'considered', 'never', 'unknown', undefined];
+  let maximum = 0;
+  let maximumPages = 0;
   assert.equal(sections.length, 8);
   for (const service_use of states) {
     for (const scope of ['driver', 'vehicle', 'business', 'dispatch', undefined]) {
       for (const suitable_lost_30d of ['0', '1-5', 'unknown', undefined]) {
-        const answers = { service_use, scope, suitable_lost_30d };
-        let count = 0;
-        for (const section of sections) {
-          assert.ok(section.purpose.length > 30);
-          const visible = model.questionsFor(section, answers);
-          assert.ok(visible.length <= 4, section.id);
-          count += visible.length;
+        for (const medallion_arrangement of ['owned', 'leased', 'both', 'other', 'unknown', undefined]) {
+          const answers = { service_use, scope, suitable_lost_30d, medallion_arrangement };
+          let count = 0;
+          let pageCount = 0;
+          for (const section of sections) {
+            assert.ok(section.purpose.length > 30);
+            const pages = model.pagesFor(section, answers);
+            pageCount += pages.length;
+            for (const page of pages) assert.ok(page.questions.length <= 4, section.id);
+            const paged = pages.flatMap(page => page.questions);
+            assert.deepEqual(paged, model.questionsFor(section, answers));
+            count += paged.length;
+          }
+          assert.ok(count <= 44);
+          maximum = Math.max(maximum, count);
+          maximumPages = Math.max(maximumPages, pageCount);
         }
-        assert.ok(count <= 29);
       }
     }
   }
+  assert.equal(maximum, 44);
+  assert.equal(maximumPages, 14);
+});
+
+test('setup separates overlapping arrangements and only asks lease follow-ups for leased medallions', () => {
+  const setup = sections[0];
+  const pages = answers => model.pagesFor(setup, answers).map(page => page.questions.map(q => q.id));
+  assert.deepEqual(pages({}), [
+    ['scope', 'working_vehicle_count', 'services_selected', 'vehicle_arrangement'],
+    ['medallion_arrangement', 'association_affiliation', 'booking_authority'],
+    ['service_formats', 'pickup_arrangements']
+  ]);
+  for (const medallion_arrangement of ['leased', 'both']) {
+    assert.deepEqual(pages({ medallion_arrangement })[2], ['medallion_lease_duration', 'medallion_consecutive_leases']);
+  }
+  for (const medallion_arrangement of ['owned', 'other', 'unknown', undefined]) {
+    assert.equal(pages({ medallion_arrangement }).length, 3);
+  }
+  const body = model.createSubmission(sections, {
+    ...answered(), working_roles: ['lease'], vehicles: '10+'
+  }, { purposes: [] }, false, 'overlapping-setup');
+  assert.equal(body.answers.vehicle_arrangement, 'owned');
+  assert.equal(body.answers.medallion_arrangement, 'leased');
+  assert.equal(body.answers.association_affiliation, 'yes');
+  assert.equal(body.answers.booking_authority, 'self');
+  assert.equal(body.answers.scope, 'business');
+  assert.equal(body.answers.working_vehicle_count, '2-3');
+  assert.equal(body.answers.vehicles, undefined);
+  assert.equal(body.answers.working_roles, undefined);
+  assert.equal(body.answers.medallion_consecutive_leases.value, 3);
+  assert.throws(() => model.parseMetric(question('medallion_consecutive_leases'), { status: 'value', value: '1.5' }), model.AnswerError);
+  const changed = model.createSubmission(sections, {
+    ...answered(), medallion_arrangement: 'owned'
+  }, { purposes: [] }, false, 'no-lease');
+  assert.equal(changed.answers.medallion_lease_duration, undefined);
+  assert.equal(changed.answers.medallion_consecutive_leases, undefined);
 });
 
 test('current, former and non-user paths ask the relevant reasons without sales qualification', () => {
@@ -104,7 +165,7 @@ test('payload drops hidden branches, obsolete questions and contact data embedde
   assert.equal(body.contact_email, undefined);
   assert.equal(body.follow_up_consent, false);
   assert.deepEqual(body.answers.services, { taxi: {}, transfer: {} });
-  assert.equal(body.questionnaire_version, '2.0.0');
+  assert.equal(body.questionnaire_version, '2.2.0');
 });
 
 test('research can be entirely unanswered and follow-up permissions remain independent', () => {
@@ -238,7 +299,10 @@ async function browser({ initial = {}, post, unavailableStorage = false, failSto
       element.value = value;
       element.oninput();
     },
-    async review() { for (let i = 0; i < 8; i++) await this.click('next'); }
+    async review() {
+      for (let i = 0; i < 14 && !$('submit-answers'); i++) await this.click('next');
+      assert.ok($('submit-answers'), 'Review should be reachable in at most fourteen pages');
+    }
   };
 }
 
@@ -251,7 +315,7 @@ test('the cover requires Begin questionnaire and does not accompany the question
   assert.equal(ui.$('cover').hidden, true);
   assert.equal(ui.$('workspace').hidden, false);
   assert.equal(ui.document.activeElement.id, 'section-title');
-  assert.ok(ui.$('working_roles-field'));
+  assert.ok(ui.$('scope-field'));
   assert.doesNotMatch(ui.$('questions').textContent, new RegExp(sections[0].purpose.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   await ui.click('next');
   await ui.click('back');
@@ -278,15 +342,42 @@ test('only a confirmed save replaces the questions with a thank-you heading and 
   assert.equal(ui.document.activeElement.id, 'section-title');
 });
 
-test('controller branches immediately, removes obsolete answers and focuses the selected control', async () => {
+test('controller pages within setup, skips inapplicable lease pages and clears hidden answers', async () => {
   const ui = await browser();
   ui.change('scope-business', undefined, true);
-  assert.ok(ui.$('vehicles-field'));
-  ui.change('vehicles-2-3', undefined, true);
+  ui.change('working_vehicle_count-2-3', undefined, true);
   ui.change('scope-driver', undefined, true);
-  assert.equal(ui.$('vehicles-field'), null);
-  assert.equal(JSON.parse(ui.values.get(model.KEY)).answers.vehicles, undefined);
+  assert.equal(ui.$('working_vehicle_count-2-3').checked, true);
+  assert.equal(JSON.parse(ui.values.get(model.KEY)).answers.working_vehicle_count, '2-3');
   await ui.click('next');
+  assert.equal(ui.$('progress').value, 1);
+  assert.match(ui.$('step').textContent, /Page 2 of 3/);
+  ui.change('medallion_arrangement-leased', undefined, true);
+  assert.match(ui.$('step').textContent, /Page 2 of 4/);
+  await ui.click('next');
+  assert.equal(ui.$('section-title').textContent, 'Your medallion lease.');
+  ui.input('medallion_lease_duration-input', 'One year');
+  ui.change('medallion_consecutive_leases-status', 'value');
+  assert.match(ui.$('medallion_consecutive_leases-field').textContent, /Number of consecutive medallion leases/);
+  assert.doesNotMatch(ui.$('medallion_consecutive_leases-field').textContent, /Number of completed bookings/);
+  ui.input('medallion_consecutive_leases-input', '1.5');
+  await ui.click('next');
+  assert.equal(ui.$('section-title').textContent, 'Your medallion lease.');
+  assert.equal(ui.document.activeElement.id, 'medallion_consecutive_leases-input');
+  ui.input('medallion_consecutive_leases-input', '3');
+  await ui.click('back');
+  ui.change('medallion_arrangement-owned', undefined, true);
+  const saved = JSON.parse(ui.values.get(model.KEY));
+  assert.equal(saved.answers.medallion_lease_duration, undefined);
+  assert.equal(saved.answers.medallion_consecutive_leases, undefined);
+  await ui.click('next');
+  assert.equal(ui.$('section-title').textContent, 'The bookings you can serve.');
+  await ui.click('back');
+  assert.equal(ui.$('section-title').textContent, 'Your arrangements.');
+  assert.equal(ui.$('progress').value, 1);
+  await ui.click('next');
+  await ui.click('next');
+  assert.equal(ui.$('progress').value, 2);
   await ui.click('next');
   ui.change('service_use-current_recent', undefined, true);
   assert.ok(ui.$('keep_service-field'));
@@ -299,9 +390,100 @@ test('controller branches immediately, removes obsolete answers and focuses the 
   assert.equal(ui.document.activeElement.id, 'service_use-never');
   assert.equal(JSON.parse(ui.values.get(model.KEY)).answers.service_name, undefined);
   await ui.click('next');
-  assert.match(ui.$('questions').textContent, /no recently used service/);
+  assert.match(ui.$('questions').textContent, /no current or recently used service/);
   assert.equal(ui.$('progress').max, 8);
   assert.equal(ui.$('progress').value, 4);
+});
+
+test('setup drafts restore their page and include all setup pages in review and submission', async () => {
+  const ui = await browser();
+  ui.change('scope-driver', undefined, true);
+  ui.change('working_vehicle_count-1', undefined, true);
+  ui.change('vehicle_arrangement-owned', undefined, true);
+  ui.change('services_selected-taxi', undefined, true);
+  await ui.click('next');
+  ui.change('medallion_arrangement-both', undefined, true);
+  ui.change('association_affiliation-yes', undefined, true);
+  ui.change('booking_authority-joint', undefined, true);
+  await ui.click('next');
+  ui.input('medallion_lease_duration-input', 'Six months');
+  ui.change('medallion_consecutive_leases-status', 'unknown');
+  const saved = JSON.parse(ui.values.get(model.KEY));
+  assert.equal(saved.questionnaire_version, '2.2.0');
+  assert.equal(saved.step, 0);
+  assert.equal(saved.page, 2);
+  const resumed = await browser({ initial: Object.fromEntries(ui.values) });
+  assert.equal(resumed.$('section-title').textContent, 'Your medallion lease.');
+  assert.equal(resumed.$('medallion_lease_duration-input').value, 'Six months');
+  await resumed.review();
+  assert.match(resumed.$('questions').textContent, /Six months/);
+  assert.match(resumed.$('questions').textContent, /We need joint approval/);
+  await resumed.click('submit-answers');
+  assert.equal(resumed.sent[0].answers.scope, 'driver');
+  assert.equal(resumed.sent[0].answers.working_vehicle_count, '1');
+  assert.equal(resumed.sent[0].answers.vehicle_arrangement, 'owned');
+  assert.equal(resumed.sent[0].answers.medallion_arrangement, 'both');
+  assert.equal(resumed.sent[0].answers.association_affiliation, 'yes');
+  assert.equal(resumed.sent[0].answers.booking_authority, 'joint');
+  assert.equal(resumed.sent[0].answers.medallion_lease_duration, 'Six months');
+  assert.deepEqual(resumed.sent[0].answers.medallion_consecutive_leases, { status: 'unknown' });
+});
+
+test('older setup drafts keep their original questions and version until explicitly cleared', async () => {
+  const initial = {
+    [model.KEY]: JSON.stringify({
+      answers: { scope: 'business', working_roles: ['lease'], vehicles: '2-3' },
+      followUp: { purposes: [] }, step: 0
+    })
+  };
+  const ui = await browser({ initial });
+  assert.ok(ui.$('working_roles-field'));
+  assert.ok(ui.$('vehicles-field'));
+  assert.equal(ui.$('working_vehicle_count-field'), null);
+  assert.match(ui.$('draft-notice').textContent, /original questions/);
+  assert.equal(ui.values.get(model.KEY), initial[model.KEY]);
+  await ui.review();
+  await ui.click('submit-answers');
+  assert.equal(ui.sent[0].questionnaire_version, '2.0.0');
+  assert.deepEqual(ui.sent[0].answers.working_roles, ['lease']);
+  assert.equal(ui.sent[0].answers.vehicles, '2-3');
+  assert.equal(ui.sent[0].answers.medallion_arrangement, undefined);
+  const cleared = await browser({ initial });
+  await cleared.click('clear');
+  assert.equal(cleared.$('working_roles-field'), null);
+  assert.ok(cleared.$('working_vehicle_count-field'));
+  cleared.change('scope-driver', undefined, true);
+  assert.equal(JSON.parse(cleared.values.get(model.KEY)).questionnaire_version, '2.2.0');
+});
+
+test('older pending responses retain the exact body, original review labels and retry identity', async () => {
+  const pending = {
+    submission_id: 'synthetic-legacy-pending',
+    questionnaire_version: '2.0.0',
+    language: 'en',
+    answers: {
+      working_roles: ['independent', 'lease'], scope: 'business', services_selected: ['taxi'],
+      vehicles: '2-3', services: { taxi: {} }, follow_up_purposes: [], pilot_interest: false
+    },
+    follow_up_consent: false,
+    is_test: true
+  };
+  const initial = { [model.PENDING_KEY]: JSON.stringify(pending) };
+  const ui = await browser({ initial, post: async () => { throw new Error('ConnectionLost'); } });
+  assert.match(ui.$('questions').textContent, /Lease a vehicle or operating rights/);
+  assert.match(ui.$('questions').textContent, /2-3/);
+  assert.doesNotMatch(ui.$('questions').textContent, /What medallion arrangement/);
+  await ui.click('submit-answers');
+  assert.deepEqual(ui.sent[0], pending);
+  assert.equal(ui.values.get(model.PENDING_KEY), initial[model.PENDING_KEY]);
+  const resumed = await browser({ initial: Object.fromEntries(ui.values) });
+  await resumed.click('submit-answers');
+  assert.deepEqual(resumed.sent[0], pending);
+  const rejected = await browser({ initial, post: async () => ({ ok: false, status: 422 }) });
+  await rejected.click('submit-answers');
+  assert.match(rejected.$('status').textContent, /could not accept/);
+  assert.match(rejected.$('questions').textContent, /Lease a vehicle or operating rights/);
+  assert.equal(JSON.parse(rejected.values.get(model.KEY)).questionnaire_version, '2.0.0');
 });
 
 test('invalid metric does not advance, while zero and unknown can be reviewed and submitted', async () => {
@@ -445,7 +627,162 @@ test('question loading and pending recovery failures are visible and cannot send
   assert.equal(corrupt.sent.length, 0);
 });
 
-test('actual response handler accepts version 2 answers and saves a retry only once in a synthetic database', async () => {
+test('inactive current services can report ongoing costs and zero completed bookings without changing older paths', () => {
+  const answers = {
+    ...answered(), service_use: 'current_notrecent',
+    existing_bookings_30d: { status: 'value', value: '0' },
+    existing_receipts_30d: { status: 'value', value: '0' }
+  };
+  assert.equal(model.questionsFor(sections[3], answers).length, 4);
+  const body = model.createSubmission(sections, answers, { purposes: [] }, false, 'inactive-service');
+  assert.equal(body.answers.existing_spend_30d.value, 40.5);
+  assert.equal(body.answers.existing_bookings_30d.value, 0);
+  for (const version of ['2.0.0', '2.1.0']) {
+    const oldSections = model.sectionsForVersion(sections, version);
+    assert.equal(model.questionsFor(oldSections[3], answers).length, 0);
+    const oldBody = model.createSubmission(sections, answers, { purposes: [] }, false, 'older-service', version);
+    assert.equal(oldBody.answers.existing_spend_30d, undefined);
+    for (const section of sections) {
+      for (const q of section.questions.filter(q => q.introduced)) assert.equal(oldBody.answers[q.id], undefined);
+    }
+    assert.equal(oldBody.answers.business_receipts_30d.value, 1200);
+    assert.equal(oldBody.answers.business_expenses_30d.value, 650);
+  }
+});
+
+test('version 2.1 drafts and pending responses preserve their original setup and financial semantics', async () => {
+  const oldAnswers = {
+    scope: 'driver', working_vehicle_count: '1', vehicle_arrangement: 'owned',
+    medallion_arrangement: 'owned', association_affiliation: 'yes', booking_authority: 'self',
+    service_use: 'current_notrecent',
+    month_context: 'typical',
+    business_receipts_30d: { status: 'value', value: 500 },
+    business_expenses_30d: { status: 'value', value: 300 },
+    services: {}, follow_up_purposes: [], pilot_interest: false
+  };
+  const pending = {
+    submission_id: 'synthetic-2.1-pending', questionnaire_version: '2.1.0',
+    language: 'en', answers: oldAnswers, follow_up_consent: false, is_test: true
+  };
+  const ui = await browser({
+    initial: { [model.PENDING_KEY]: JSON.stringify(pending) },
+    post: async () => { throw new Error('ConnectionLost'); }
+  });
+  assert.match(ui.$('questions').textContent, /same submission/);
+  assert.doesNotMatch(ui.$('questions').textContent, /What do you pay for, how much, and how often/);
+  await ui.click('submit-answers');
+  assert.deepEqual(ui.sent[0], pending);
+  const resumed = await browser({ initial: Object.fromEntries(ui.values) });
+  await resumed.click('submit-answers');
+  assert.deepEqual(resumed.sent[0], pending);
+  const draft = await browser({ initial: {
+    [model.KEY]: JSON.stringify({ questionnaire_version: '2.1.0', answers: oldAnswers, followUp: { purposes: [] }, step: 0, page: 1 })
+  } });
+  assert.equal(draft.$('section-title').textContent, 'Your arrangements.');
+  await draft.click('next');
+  assert.equal(draft.$('section-title').textContent, 'How guests reach you.');
+  assert.equal(draft.$('pickup_arrangements-field'), null);
+});
+
+test('financial pages capture completed work and itemized spending separately and survive uncertain saving', async () => {
+  const ui = await browser({
+    initial: { [model.KEY]: JSON.stringify({ questionnaire_version: '2.2.0', answers: { scope: 'driver' }, followUp: { purposes: [] }, step: 6, page: 0 }) },
+    post: async () => { throw new Error('ConnectionLost'); }
+  });
+  assert.equal(ui.$('section-title').textContent, 'The work you completed.');
+  ui.change('completed_bookings_30d-status', 'value');
+  ui.input('completed_bookings_30d-input', '2.5');
+  await ui.click('next');
+  assert.equal(ui.document.activeElement.id, 'completed_bookings_30d-input');
+  ui.input('completed_bookings_30d-input', '20');
+  ui.input('booking_mix_30d-input', '12 local vehicle bookings; 8 private transfers.');
+  await ui.click('next');
+  assert.equal(ui.$('section-title').textContent, 'What you receive and spend.');
+  assert.match(ui.$('operating_cost_details-help').textContent, /frequency/);
+  assert.match(ui.$('operating_cost_details-help').textContent, /count them only once/);
+  assert.match(ui.$('operating_cost_details-help').textContent, /unpaid administrative time is recorded separately/);
+  ui.change('business_receipts_30d-status', 'value');
+  ui.input('business_receipts_30d-input', '1200');
+  ui.change('business_expenses_30d-status', 'value');
+  ui.input('business_expenses_30d-input', '650');
+  ui.input('operating_cost_details-input', answered().operating_cost_details);
+  await ui.review();
+  assert.match(ui.$('questions').textContent, /Fuel about \$100 weekly/);
+  await ui.click('submit-answers');
+  const body = ui.sent[0];
+  assert.equal(body.answers.completed_bookings_30d.value, 20);
+  assert.equal(body.answers.business_receipts_30d.value, 1200);
+  assert.equal(body.answers.business_expenses_30d.value, 650);
+  assert.equal(body.answers.booking_mix_30d, '12 local vehicle bookings; 8 private transfers.');
+  assert.equal(body.answers.operating_cost_details, answered().operating_cost_details);
+  assert.equal(body.follow_up_consent, false);
+  const resumed = await browser({ initial: Object.fromEntries(ui.values) });
+  await resumed.click('submit-answers');
+  assert.deepEqual(resumed.sent[0], body);
+});
+
+test('all displayed checkbox instructions are prominent and connected to their controls', async () => {
+  const answers = answered();
+  const ui = await browser({ initial: {
+    [model.KEY]: JSON.stringify({ questionnaire_version: '2.2.0', answers, followUp: { purposes: [] }, step: 0, page: 0 })
+  } });
+  for (const section of sections) {
+    for (const page of model.pagesFor(section, answers)) {
+      for (const q of page.questions.filter(q => q.kind.startsWith('multi'))) {
+        const help = ui.$(q.id + '-help');
+        assert.ok(help, q.id);
+        assert.match(help.className, /selection-help/, q.id);
+        assert.match(help.textContent, q.kind === 'multi3' ? /Choose up to three/ : /Choose all that apply/, q.id);
+        const control = ui.$(q.id + '-' + q.options[0].split('|')[0]);
+        assert.match(control.attributes['aria-describedby'], new RegExp(q.id + '-help'));
+      }
+      await ui.click('next');
+    }
+  }
+  assert.ok(ui.$('submit-answers'));
+});
+
+test('unsupported saved versions remain preserved instead of being silently reinterpreted', async () => {
+  const value = JSON.stringify({ questionnaire_version: '9.0.0', answers: answered(), followUp: { purposes: [] }, step: 0 });
+  const ui = await browser({ initial: { [model.KEY]: value } });
+  assert.equal(ui.values.get(model.KEY), value);
+  assert.equal(ui.$('next').disabled, true);
+  assert.equal(ui.sent.length, 0);
+  await ui.click('clear');
+  assert.ok(ui.$('working_vehicle_count-field'));
+  ui.change('scope-driver', undefined, true);
+  assert.equal(JSON.parse(ui.values.get(model.KEY)).questionnaire_version, '2.2.0');
+});
+
+test('page and review headings gain one decorative brand dot without changing questions or existing question marks', async () => {
+  const ui = await browser();
+  const assertDot = element => {
+    const dots = element.children.filter(child => child.className === 'heading-dot');
+    assert.equal(dots.length, 1);
+    assert.equal(dots[0].textContent, '.');
+    assert.equal(dots[0].attributes['aria-hidden'], 'true');
+    assert.doesNotMatch(element.textContent, /\.\.$/);
+  };
+  assert.equal(ui.$('section-title').textContent, 'Your work.');
+  assertDot(ui.$('section-title'));
+  assert.equal(ui.$('working_vehicle_count-field').children[0].textContent, 'How many working vehicles does that work involve?');
+  assert.equal(ui.$('next').textContent, 'Continue');
+  await ui.review();
+  assertDot(ui.$('section-title'));
+  const cards = ui.$('questions').children.filter(element => element.className === 'review-card');
+  assert.equal(cards.length, sections.length);
+  cards.forEach((card, index) => {
+    assert.equal(card.children[0].textContent, sections[index].title + '.');
+    assertDot(card.children[0]);
+  });
+  const questionTitle = await browser({ initial: {
+    [model.KEY]: JSON.stringify({ questionnaire_version: '2.2.0', answers: {}, followUp: { purposes: [] }, step: 7, page: 1 })
+  } });
+  assert.equal(questionTitle.$('section-title').textContent, 'Anything we missed?');
+  assert.equal(questionTitle.$('section-title').children.length, 0);
+});
+
+test('actual response handler accepts version 2.2 research answers and saves a retry only once in a synthetic database', async () => {
   const workerSource = fs.readFileSync(path.join(root, 'worker.js'), 'utf8');
   const context = { Request, Response, URL, crypto: { randomUUID } };
   vm.createContext(context);
@@ -482,6 +819,10 @@ test('actual response handler accepts version 2 answers and saves a retry only o
   assert.equal((await second.json()).duplicate, true);
   assert.equal(inserts, 1);
   assert.equal(rows.get(body.submission_id).answers.existing_spend_30d.value, 40.5);
+  assert.equal(rows.get(body.submission_id).answers.medallion_arrangement, 'leased');
+  assert.equal(rows.get(body.submission_id).answers.medallion_consecutive_leases.value, 3);
+  assert.equal(rows.get(body.submission_id).answers.operating_cost_details, answered().operating_cost_details);
+  assert.equal(rows.get(body.submission_id).answers.completed_bookings_30d.value, 20);
   assert.equal(rows.get(body.submission_id).contact_email, 'synthetic@example.test');
   const optionalIdentity = model.createSubmission(sections, {}, {
     purposes: [], name: 'Sample Operator', method: 'email', contact: 'sample@example.test'
@@ -495,11 +836,135 @@ test('actual response handler accepts version 2 answers and saves a retry only o
   assert.equal(rows.get(optionalIdentity.submission_id).follow_up_consent, 0);
 });
 
+function adminWorker() {
+  const context = { Request, Response, URL, crypto: { randomUUID } };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync(path.join(root, 'worker.js'), 'utf8').replace('export default {', 'globalThis.worker = {'), context);
+  return context.worker;
+}
+
+test('admin login opens without a credential while every response API remains protected', async () => {
+  const worker = adminWorker();
+  const env = { eta_responses: { prepare() { assert.fail('Unauthenticated requests must not access the database'); } } };
+  const page = await worker.fetch(new Request('https://eta.invalid/admin'), env);
+  assert.equal(page.status, 200);
+  assert.equal(page.headers.get('Cache-Control'), 'no-store');
+  assert.match(page.headers.get('Content-Security-Policy'), /connect-src 'self'/);
+  assert.match(await page.text(), /id="content" hidden/);
+  for (const [path, method] of [['/api/admin/responses', 'GET'], ['/api/admin/export', 'GET'], ['/api/admin/responses/test', 'DELETE']]) {
+    const response = await worker.fetch(new Request('https://eta.invalid' + path, { method }), env);
+    assert.equal(response.status, 401);
+  }
+  assert.equal((await worker.fetch(new Request('https://eta.invalid/admin', { method: 'POST' }), env)).status, 405);
+});
+
+test('authorized response viewing and CSV export retain the new financial answers in a synthetic database', async () => {
+  const worker = adminWorker();
+  const row = {
+    id: 'synthetic-response', submission_id: 'synthetic-export', questionnaire_version: '2.2.0',
+    language: 'en', created_at: '2026-11-12T00:00:00Z',
+    answers: JSON.stringify(model.createSubmission(sections, answered(), { purposes: [] }, true, 'synthetic-export').answers),
+    follow_up_consent: 0, is_test: 1, contact_name: null, contact_phone: null, contact_email: null
+  };
+  const env = {
+    ADMIN_TOKEN: 'synthetic-test-only',
+    eta_responses: { prepare(sql) {
+      return {
+        bind() { return this; },
+        async all() { return { results: sql.includes('WHERE is_test = 0') ? [] : [row] }; }
+      };
+    } }
+  };
+  const request = endpoint => worker.fetch(new Request('https://eta.invalid' + endpoint, { headers: { Authorization: 'Bearer synthetic-test-only' } }), env);
+  const viewed = await (await request('/api/admin/responses')).json();
+  assert.equal(viewed.responses[0].answers.operating_cost_details, answered().operating_cost_details);
+  assert.equal(viewed.responses[0].answers.completed_bookings_30d.value, 20);
+  assert.equal((await (await request('/api/admin/responses?exclude_test=true')).json()).count, 0);
+  const exported = await request('/api/admin/export');
+  assert.match(exported.headers.get('Content-Type'), /text\/csv/);
+  const csv = await exported.text();
+  assert.match(csv, /answer\.operating_cost_details/);
+  assert.match(csv, /answer\.completed_bookings_30d\.value/);
+  assert.match(csv, /Fuel about \$100 weekly/);
+});
+
+async function adminBrowser(fetch) {
+  const html = await (await adminWorker().fetch(new Request('https://eta.invalid/admin'), {})).text();
+  const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const elements = new Map();
+  const document = {
+    getElementById(id) { return elements.get(id); },
+    querySelector(selector) { assert.equal(selector, '#t tbody'); return elements.get('tbody'); },
+    createElement(tag) {
+      const element = new Element(tag, this);
+      element.appendChild = child => element.append(child);
+      element.click = () => { context.downloads++; };
+      return element;
+    }
+  };
+  for (const id of ['token', 'login', 'login-button', 'content', 'status', 'detail', 'excludeTest', 'serviceType', 'tbody']) {
+    elements.set(id, document.createElement('div'));
+  }
+  elements.get('content').hidden = true;
+  elements.get('excludeTest').checked = true;
+  const context = {
+    document, fetch, URLSearchParams, downloads: 0,
+    URL: { createObjectURL() { return 'blob:synthetic'; }, revokeObjectURL() {} },
+    setTimeout(callback) { callback(); }
+  };
+  vm.createContext(context);
+  vm.runInContext(script, context);
+  return { context, get: id => elements.get(id), script };
+}
+
+test('admin login failures stay visible and successful viewing renders submitted text without HTML execution', async () => {
+  let accept = false;
+  const calls = [];
+  const row = { id: 'synthetic', created_at: '2026-11-12', language: 'en', is_test: false,
+    contact_name: '<img src=x onerror=alert(1)>', answers: { services: {}, operating_cost_details: 'Fuel weekly' } };
+  const ui = await adminBrowser(async (path, options) => {
+    calls.push({ path, options });
+    return new Response(JSON.stringify(accept ? { responses: [row] } : { error: 'Unauthorized' }), { status: accept ? 200 : 401 });
+  });
+  ui.get('token').value = 'synthetic-test-only';
+  await ui.context.login();
+  assert.equal(ui.get('content').hidden, true);
+  assert.match(ui.get('status').textContent, /credential not accepted/);
+  accept = true;
+  ui.get('token').value = 'synthetic-test-only';
+  await ui.context.login();
+  assert.equal(ui.get('content').hidden, false);
+  assert.equal(ui.get('token').value, '');
+  assert.match(ui.get('tbody').textContent, /<img src=x onerror=alert\(1\)>/);
+  assert.doesNotMatch(ui.script, /\.innerHTML\s*=/);
+  ui.get('tbody').children[0].children.at(-1).children[0].onclick();
+  assert.match(ui.get('detail').textContent, /Fuel weekly/);
+  assert.equal(calls.at(-1).options.method, 'GET');
+  assert.equal(calls.at(-1).options.cache, 'no-store');
+  assert.match(calls.at(-1).path, /exclude_test=true/);
+  ui.context.logout();
+  assert.equal(ui.get('content').hidden, true);
+  assert.equal(ui.get('tbody').children.length, 0);
+  assert.doesNotMatch(ui.script, /localStorage|sessionStorage/);
+});
+
+test('failed or malformed admin exports never start a success-shaped download', async () => {
+  let status = 503;
+  const ui = await adminBrowser(async () => new Response('Not a CSV', { status }));
+  await ui.context.exportCsv();
+  assert.equal(ui.context.downloads, 0);
+  assert.match(ui.get('status').textContent, /Request failed \(503\)/);
+  status = 200;
+  await ui.context.exportCsv();
+  assert.equal(ui.context.downloads, 0);
+  assert.match(ui.get('status').textContent, /did not return a CSV/);
+});
+
 test('questionnaire resources and accessibility references are self-contained and use the approved emphasis', () => {
   const html = fs.readFileSync(path.join(root, 'public/questionnaire/index.html'), 'utf8');
   assert.match(html, /around island/);
-  assert.match(html, /<strong><em>you<\/em><\/strong>/);
-  assert.match(html, /<strong><em>we<\/em><\/strong>/);
+  assert.match(html, /<strong>you<\/strong>/);
+  assert.match(html, /<strong>we<\/strong>/);
   assert.match(html, /id="workspace"[^>]*hidden/);
   assert.match(html, /<noscript>/);
   assert.match(html, /max="8"/);
@@ -507,4 +972,33 @@ test('questionnaire resources and accessibility references are self-contained an
     assert.ok(fs.existsSync(path.join(root, 'public', match[1])));
   }
   assert.doesNotMatch(html, /https?:\/\//);
+});
+
+test('the cover contains the requested copy and hierarchy while research headings and selection help remain readable', () => {
+  const html = fs.readFileSync(path.join(root, 'public/questionnaire/index.html'), 'utf8');
+  const css = fs.readFileSync(path.join(root, 'public/assets/questionnaire.css'), 'utf8');
+  assert.match(html, /Our best work starts<br>with understanding yours\./);
+  assert.match(html, /VI Taxi Operator Research/);
+  assert.match(html, /Your shared experience &#8594; A way for us to make it better\./);
+  const hero = html.match(/<h1 id="intro-title">([\s\S]*?)<\/h1>/)[1];
+  assert.equal((hero.match(/class="hero-line"/g) || []).length, 3);
+  assert.deepEqual([...hero.matchAll(/<span>([^<]+)<\/span>/g)].map(match => match[1]),
+    ['Change nothing.', 'Book more rides.', 'Drive more.', 'Coordinate less.', 'Earn more.', 'Keep more of it.']);
+  assert.match(hero, /<em class="hero-line"><span>Earn more\.<\/span> <span>Keep more of it\.<\/span><\/em>/);
+  assert.match(html, /<p><strong>Taxi operators asked, we listened\.<\/strong><\/p>/);
+  assert.match(html, /<strong>VI Transportation Operator Questionnaire\.<\/strong>/);
+  assert.match(html, /Please complete all sections as best as you can\./);
+  assert.match(html, /Detailed answers are most helpful, but estimates and "I'm not sure" are still useful answers\. Do not share sensitive information\./);
+  const invitation = html.match(/<div class="invitation">([\s\S]*?)<\/div>/)[1];
+  assert.match(invitation, /Help shape what we build to enhance your business\./);
+  assert.match(invitation, /A real opportunity becomes a shared interest/);
+  assert.doesNotMatch(invitation, /Eight short sections/);
+  assert.doesNotMatch(html, /class="lead"|shared-interest|Offline preview only/);
+  assert.match(html, /id="begin"[^>]*>BEGIN &#10132;/);
+  assert.match(css, /\.intro h1\{font-family:inherit;font-weight:750;[^}]*text-wrap:balance/);
+  assert.match(css, /\.intro h1 em\{font-weight:inherit;font-style:normal\}/);
+  assert.match(css, /\.intro h1 \.hero-line\{display:block\}/);
+  assert.match(css, /\.intro h1 \.hero-line>span\{display:inline-block;white-space:nowrap\}/);
+  assert.match(css, /\.workspace h2,\.workspace h3\{font-family:inherit;font-weight:750/);
+  assert.match(css, /\.selection-help\{[^}]*background:var\(--accent\);color:var\(--white\);font-size:15px;font-weight:700/);
 });

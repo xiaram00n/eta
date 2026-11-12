@@ -1,9 +1,17 @@
 (function () {
   'use strict';
 
-  const VERSION = '2.0.0';
+  const VERSION = '2.2.0';
+  const VERSIONS = ['2.0.0', '2.1.0', VERSION];
   const KEY = 'eta-research-v4';
   const PENDING_KEY = KEY + '-pending';
+  // Keep the original setup schema for drafts and immutable submissions made before 2.1.
+  const LEGACY_SETUP = [
+    { id: 'working_roles', title: 'Which roles do you handle?', kind: 'multi', help: 'Choose all that apply.', options: ['independent|Drive independently', 'owner|Own or manage vehicles', 'lease|Lease a vehicle or operating rights', 'employee|Drive for someone else', 'dispatcher|Coordinate bookings or drivers', 'other|Other'] },
+    { id: 'scope', title: 'Whose work will your answers describe?', kind: 'single', options: ['driver|My own work', 'vehicle|One vehicle', 'business|A business with several vehicles', 'dispatch|A booking or dispatch operation'] },
+    { id: 'services_selected', title: 'Which transportation services do you provide?', kind: 'multi', help: 'Choose all that apply.', options: ['taxi|Local rides', 'transfer|Airport or ferry transfers', 'tour|Private tours', 'villa|Transportation during guest stays', 'wedding|Weddings or events', 'reserved|Reserved or hourly driving', 'other|Other'] },
+    { id: 'vehicles', title: 'How many working vehicles do these answers cover?', kind: 'single', show: { scope: ['vehicle', 'business', 'dispatch'] }, options: ['1|1', '2-3|2-3', '4-9|4-9', '10+|10 or more', 'unknown|Not sure'] }
+  ];
   const SERVICES = ['taxi', 'transfer', 'tour', 'villa', 'wedding', 'reserved', 'other'];
   const EXCLUSIVE = ['none', 'unknown', 'na', 'free'];
   const METRIC_STATUSES = ['value', 'unknown', 'cannot_separate', 'prefer_not'];
@@ -29,6 +37,37 @@
     return visible(section, answers) ? section.questions.filter(question => visible(question, answers)) : [];
   }
 
+  function sectionsForVersion(sections, version) {
+    if (version === VERSION) return sections;
+    if (!VERSIONS.includes(version)) throw new Error('QuestionnaireVersionError');
+    return sections.map(section => {
+      const legacy = {
+        ...section,
+        questions: section.questions.filter(question => !question.introduced).map(question => question.id === 'preserve'
+          ? { ...question, options: question.options.filter(option => !['customer_data', 'sharing'].includes(option.split('|')[0])) }
+          : question)
+      };
+      if (section.id !== 'setup') delete legacy.pages;
+      if (section.id === 'setup' && version === '2.0.0') {
+        delete legacy.pages;
+        legacy.questions = LEGACY_SETUP;
+      }
+      if (section.id === 'service-value') {
+        legacy.show = { service_use: ['current_recent', 'former_recent'] };
+        legacy.skipNote = 'Based on your earlier answer, there is no recently used service to describe here. Continue to the next section, or go back if you would like to change that answer.';
+      }
+      return legacy;
+    });
+  }
+
+  function pagesFor(section, answers) {
+    const questions = questionsFor(section, answers);
+    if (!section.pages || !questions.length) return [{ title: section.title, questions }];
+    return section.pages.map((title, page) => ({
+      title, questions: questions.filter(question => question.page === page)
+    })).filter(page => page.questions.length);
+  }
+
   function selectMultiple(previous, value, checked, limit = Infinity) {
     const values = Array.isArray(previous) ? previous : [];
     if (!checked) return values.filter(item => item !== value);
@@ -49,7 +88,7 @@
       : /^(?:(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d{0,2})?|\.\d{1,2})$/;
     if (!pattern.test(input)) {
       throw new AnswerError(question.id, question.kind === 'count'
-        ? 'Enter a whole number of bookings, including 0, or choose another answer.'
+        ? 'Enter a whole number, including 0, or choose another answer.'
         : 'Enter a non-negative USD amount with up to two decimal places, including 0, or choose another answer.');
     }
     const value = Number(input.replaceAll(',', ''));
@@ -115,7 +154,8 @@
     return { purposes, ...(name ? { name } : {}), ...(contact ? { method: followUp.method, contact } : {}) };
   }
 
-  function createSubmission(sections, answers, followUp, isTest, id) {
+  function createSubmission(sections, answers, followUp, isTest, id, version = VERSION) {
+    sections = sectionsForVersion(sections, version);
     const cleaned = researchAnswers(sections, answers);
     const consent = cleanFollowUp(followUp);
     cleaned.services = Object.fromEntries((cleaned.services_selected || []).filter(service => SERVICES.includes(service)).map(service => [service, {}]));
@@ -123,7 +163,7 @@
     cleaned.pilot_interest = consent.purposes.includes('prototype');
     const body = {
       submission_id: id,
-      questionnaire_version: VERSION,
+      questionnaire_version: version,
       language: 'en',
       answers: cleaned,
       follow_up_consent: consent.purposes.length > 0,
@@ -150,7 +190,7 @@
     return Array.isArray(value) ? value.map(label).join('; ') : label(value);
   }
 
-  const model = { VERSION, KEY, PENDING_KEY, AnswerError, visible, questionsFor, selectMultiple, parseMetric, researchAnswers, cleanFollowUp, createSubmission, displayAnswer };
+  const model = { VERSION, KEY, PENDING_KEY, AnswerError, visible, questionsFor, pagesFor, sectionsForVersion, selectMultiple, parseMetric, researchAnswers, cleanFollowUp, createSubmission, displayAnswer };
   if (typeof module !== 'undefined' && module.exports) module.exports = model;
   if (typeof document === 'undefined') return;
 
@@ -186,9 +226,12 @@
       return;
     }
 
+    const currentSections = sections;
     let answers = {};
     let followUp = { purposes: [] };
     let step = 0;
+    let page = 0;
+    let version = VERSION;
     let pending = null;
     let busy = false;
     let done = false;
@@ -206,10 +249,16 @@
         if (draft) {
           const saved = JSON.parse(draft);
           if (!record(saved) || !record(saved.answers) || !record(saved.followUp)) throw new Error('DraftFormatError');
+          version = saved.questionnaire_version ?? '2.0.0';
+          sections = sectionsForVersion(currentSections, version);
           answers = saved.answers;
           followUp = saved.followUp;
           step = Number.isInteger(saved.step) && saved.step >= 0 && saved.step < sections.length ? saved.step : 0;
-          draftNotice('Your draft has been restored on this device. Nothing has been sent unless a submission was previously confirmed.');
+          const pages = pagesFor(sections[step], answers);
+          page = Number.isInteger(saved.page) && saved.page >= 0 && saved.page < pages.length ? saved.page : 0;
+          draftNotice(version === VERSION
+            ? 'Your draft has been restored on this device. Nothing has been sent unless a submission was previously confirmed.'
+            : 'Your earlier-version draft has been restored with its original questions. Your answers have not been reinterpreted. Nothing has been sent unless a submission was previously confirmed.');
         }
       } catch (error) {
         draftLocked = true;
@@ -220,18 +269,20 @@
         const saved = storage.getItem(PENDING_KEY);
         if (saved) {
           const candidate = JSON.parse(saved);
-          if (!record(candidate) || candidate.questionnaire_version !== VERSION || !record(candidate.answers) || typeof candidate.submission_id !== 'string' || !candidate.submission_id) {
+          if (!record(candidate) || !VERSIONS.includes(candidate.questionnaire_version) || !record(candidate.answers) || typeof candidate.submission_id !== 'string' || !candidate.submission_id) {
             throw new Error('PendingFormatError');
           }
-          const restored = createSubmission(sections, candidate.answers, {
+          const restored = createSubmission(currentSections, candidate.answers, {
             purposes: candidate.answers.follow_up_purposes || [],
             name: candidate.contact_name || '',
             method: candidate.contact_email ? 'email' : 'phone',
             contact: candidate.contact_email || candidate.contact_phone || ''
-          }, candidate.is_test, candidate.submission_id);
+          }, candidate.is_test, candidate.submission_id, candidate.questionnaire_version);
           if (candidate.language !== 'en' || typeof candidate.is_test !== 'boolean' || JSON.stringify(restored) !== JSON.stringify(candidate)) {
             throw new Error('PendingSnapshotError');
           }
+          version = candidate.questionnaire_version;
+          sections = sectionsForVersion(currentSections, version);
           pending = candidate;
         }
       } catch (error) {
@@ -256,7 +307,7 @@
     function save() {
       if (draftLocked || !storage || pending || done) return;
       try {
-        storage.setItem(KEY, JSON.stringify({ answers, followUp, step }));
+        storage.setItem(KEY, JSON.stringify({ questionnaire_version: version, answers, followUp, step, page }));
       } catch (error) {
         logError('Draft could not be stored.', error);
         draftNotice('Your latest changes could not be saved on this device. Keep the page open until submission is confirmed.');
@@ -327,12 +378,14 @@
       const field = node('fieldset', undefined, 'question');
       field.id = question.id + '-field';
       field.append(node('legend', question.title));
-      if (question.help) {
-        const help = node('p', question.help, 'field-help');
+      const multiple = question.kind.startsWith('multi');
+      const helpText = question.help || (multiple ? question.kind === 'multi3' ? 'Choose up to three.' : 'Choose all that apply.' : '');
+      if (helpText) {
+        const help = node('p', helpText, multiple ? 'field-help selection-help' : 'field-help');
         help.id = question.id + '-help';
         field.append(help);
       }
-      const description = [question.help ? question.id + '-help' : '', question.id + '-error'].filter(Boolean).join(' ');
+      const description = [helpText ? question.id + '-help' : '', question.id + '-error'].filter(Boolean).join(' ');
       const value = answers[question.id];
       if (question.kind === 'money' || question.kind === 'count') {
         const select = node('select');
@@ -359,7 +412,7 @@
         };
         field.append(select);
         if (record(value) && value.status === 'value') {
-          const label = node('label', question.kind === 'money' ? 'Amount in US dollars' : 'Number of completed bookings', 'input-label');
+          const label = node('label', question.inputLabel || (question.kind === 'money' ? 'Amount in US dollars' : 'Number of completed bookings'), 'input-label');
           label.htmlFor = question.id + '-input';
           const input = node('input');
           input.id = label.htmlFor;
@@ -423,8 +476,19 @@
       root.append(field);
     }
 
+    function brandedHeading(tag, title) {
+      const period = title.endsWith('.');
+      const element = node(tag, period ? title.slice(0, -1) : title);
+      if (period || !/[?!]$/.test(title)) {
+        const dot = node('span', '.', 'heading-dot');
+        dot.setAttribute('aria-hidden', 'true');
+        element.append(dot);
+      }
+      return element;
+    }
+
     function heading(title, purpose) {
-      const titleNode = node('h2', title);
+      const titleNode = brandedHeading('h2', title);
       titleNode.id = 'section-title';
       titleNode.tabIndex = -1;
       const root = $('questions');
@@ -439,24 +503,28 @@
 
     function renderSection(focusId) {
       const section = sections[step];
-      $('step').textContent = (step + 1) + ' / ' + sections.length + ' · ' + section.title;
+      const pages = pagesFor(section, answers);
+      page = Math.min(page, pages.length - 1);
+      const current = pages[page];
+      $('step').textContent = (step + 1) + ' / ' + sections.length + ' · ' + section.title
+        + (pages.length > 1 ? ' · Page ' + (page + 1) + ' of ' + pages.length : '');
       $('progress').value = step + 1;
-      const root = heading(section.title);
+      const root = heading(current.title);
       if (!visible(section, answers)) {
         root.append(node('p', section.skipNote, 'notice'));
       } else {
         if (section.note) root.append(node('p', section.note, 'section-note'));
-        for (const question of questionsFor(section, answers)) addQuestion(question, root);
+        for (const question of current.questions) addQuestion(question, root);
       }
       $('controls').hidden = false;
-      $('back').disabled = step === 0;
-      $('next').textContent = step === sections.length - 1 ? 'Review my answers' : 'Continue';
+      $('back').disabled = step === 0 && page === 0;
+      $('next').textContent = step === sections.length - 1 && page === pages.length - 1 ? 'Review my answers' : 'Continue';
       if (focusId) $(focusId)?.focus();
     }
 
     function appendFollowUp(root) {
       const panel = node('section', undefined, 'follow-up');
-      panel.append(node('h3', 'A little about you, only if you wish.'));
+      panel.append(brandedHeading('h3', 'A little about you, only if you wish.'));
       panel.append(node('p', "Your experience helps us understand what could make operators' work easier and more profitable. If you'd like us to know who these answers came from, you're welcome to leave your name and contact details below.", 'section-note'));
       panel.append(node('p', 'You do not have to share either. Prefer not to? Thank you for taking the time to help.', 'optional-note'));
       const nameLabel = node('label', 'Name (optional)', 'input-label');
@@ -543,7 +611,7 @@
         pending ? 'Confirmation is still pending. Retry sends the same response with the same reference, not a second research response.' : 'Review your answers before sending. You can go back, change anything, or leave questions unanswered.');
       for (const section of sections) {
         const card = node('section', undefined, 'review-card');
-        card.append(node('h3', section.title));
+        card.append(brandedHeading('h3', section.title));
         const questions = questionsFor(section, data);
         if (!visible(section, data)) card.append(node('p', 'Not applicable based on your earlier answer.', 'review-note'));
         else {
@@ -555,7 +623,7 @@
       }
       if (pending) {
         const card = node('section', undefined, 'review-card');
-        card.append(node('h3', 'Your optional details and permissions'));
+        card.append(brandedHeading('h3', 'Your optional details and permissions'));
         const purposes = pending.answers.follow_up_purposes || [];
         card.append(node('p', pending.follow_up_consent ? purposes.map(value => value === 'prototype' ? 'Prototype feedback invitation' : 'Clarifying research answers').join('; ') : 'No follow-up contact requested.'));
         if (pending.contact_name) card.append(node('p', pending.contact_name));
@@ -586,7 +654,7 @@
       if (busy || done || draftLocked) return;
       if (!pending) {
         try {
-          pending = createSubmission(sections, answers, followUp, isTest, crypto.randomUUID());
+          pending = createSubmission(sections, answers, followUp, isTest, crypto.randomUUID(), version);
         } catch (error) {
           if (!(error instanceof AnswerError)) throw error;
           errorFor(error.id, error.message);
@@ -666,10 +734,16 @@
     $('next').onclick = () => {
       if (busy || done || pending || draftLocked) return;
       try {
-        for (const question of questionsFor(sections[step], answers)) cleanAnswer(question, answers[question.id]);
-        if (step === sections.length - 1) renderReview();
+        const pages = pagesFor(sections[step], answers);
+        for (const question of pages[page].questions) cleanAnswer(question, answers[question.id]);
+        if (page < pages.length - 1) {
+          page++;
+          save();
+          renderSection();
+        } else if (step === sections.length - 1) renderReview();
         else {
           step++;
+          page = 0;
           save();
           renderSection();
         }
@@ -682,7 +756,11 @@
     };
     $('back').onclick = () => {
       if (busy || pending || done || draftLocked) return;
-      step = Math.max(0, step - 1);
+      if (page > 0) page--;
+      else if (step > 0) {
+        step--;
+        page = pagesFor(sections[step], answers).length - 1;
+      }
       save();
       renderSection();
       message('');
@@ -700,6 +778,9 @@
       answers = {};
       followUp = { purposes: [] };
       step = 0;
+      page = 0;
+      sections = currentSections;
+      version = VERSION;
       draftLocked = false;
       $('draft-notice').hidden = true;
       $('next').disabled = false;

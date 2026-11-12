@@ -14,8 +14,8 @@
  *   /partnership  — partnership walkthrough (unlisted)
  *   /questionnaire — operator questionnaire
  *
- * Protected route:
- *   /admin        — admin workspace (bearer token required, inline HTML)
+ * Admin entry:
+ *   /admin        — login screen; all response APIs require a bearer token
  */
 
 const MAX_BODY = 102400;
@@ -198,38 +198,58 @@ async function handleDelete(env, id) {
   return json({ success: true, deleted: id });
 }
 
-// ─── Admin page (inline, protected) ─────────────────────
+// ─── Admin login (response data remains protected) ──────
 
 function adminPage() {
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ETA Admin</title><style>body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}
-table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{border:1px solid #ddd;padding:.5rem;text-align:left;font-size:.875rem}
+<meta name="robots" content="noindex,nofollow"><title>ETA Admin</title><style>*{box-sizing:border-box}body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}
+.response-table{max-width:100%;overflow-x:auto}table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{border:1px solid #ddd;padding:.5rem;text-align:left;font-size:.875rem}
 th{background:#f5f5f5}.test{color:#999}button{cursor:pointer;padding:.25rem .5rem}
 .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}pre{background:#f5f5f5;padding:1rem;overflow-x:auto;font-size:.75rem}
-#login{max-width:400px}#login input{width:100%;padding:.5rem;margin:.5rem 0}</style></head>
-<body><h1>ETA — Admin</h1><div id="login"><p>Enter admin token:</p>
-<input type="password" id="token" placeholder="Admin token"/><button onclick="login()">Login</button></div>
-<div id="content" style="display:none"><div class="filters">
-<label><input type="checkbox" id="excludeTest" checked onchange="load()"> Exclude test</label>
-<input type="text" id="serviceType" placeholder="Service filter" onchange="load()">
-<button onclick="load()">Refresh</button><button onclick="exportCsv()">Export CSV</button></div>
-<table id="t"><thead><tr><th>ID</th><th>Created</th><th>Lang</th><th>Test</th><th>Services</th><th>Contact</th><th>Actions</th></tr></thead><tbody></tbody></table>
+#login{max-width:400px}#login input{width:100%;padding:.5rem;margin:.5rem 0}[hidden]{display:none!important}#status{padding:1rem;background:#fff0eb}</style></head>
+<body><h1>ETA — Questionnaire responses</h1><p>Responses are stored in ETA's database, not emailed. Use View to read a complete response or Export CSV to download the answers. Test responses are excluded by default.</p>
+<p id="status" role="status" aria-live="polite" hidden></p>
+<div id="login"><label for="token">Admin credential</label>
+<input type="password" id="token" autocomplete="off"/><button id="login-button" onclick="login()">Login</button><p>Your credential is used only for this open page and is not saved in browser storage.</p></div>
+<div id="content" hidden><div class="filters">
+<label><input type="checkbox" id="excludeTest" checked onchange="refresh()"> Exclude test</label>
+<input type="text" id="serviceType" placeholder="Service filter" aria-label="Service filter" onchange="refresh()">
+<button onclick="refresh()">Refresh</button><button onclick="exportCsv()">Export CSV</button><button onclick="logout()">Log out</button></div>
+<div class="response-table"><table id="t"><thead><tr><th>ID</th><th>Created</th><th>Lang</th><th>Test</th><th>Services</th><th>Contact</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
 <pre id="detail">Select a response to view.</pre></div>
 <script>let token='';
-function login(){token=document.getElementById('token').value;document.getElementById('login').style.display='none';document.getElementById('content').style.display='block';load()}
-async function api(p,m='GET'){const r=await fetch(p,{m,headers:{Authorization:'Bearer '+token}});if(r.status===401){alert('Invalid token');location.reload()}return r}
+const el=id=>document.getElementById(id);
+function notice(text){el('status').textContent=text;el('status').hidden=!text}
+function logout(){token='';el('token').value='';el('login').hidden=false;el('content').hidden=true;document.querySelector('#t tbody').replaceChildren();el('detail').textContent='Select a response to view.';notice('')}
+async function api(p,method='GET'){
+const r=await fetch(p,{method,cache:'no-store',headers:{Authorization:'Bearer '+token}});
+if(r.status===401){logout();throw new Error('Admin credential not accepted. No response data loaded.')}
+if(!r.ok)throw new Error('Request failed ('+r.status+'). Please try again; no success has been confirmed.');
+return r}
+async function login(){const entered=el('token').value;if(!entered){notice('Enter your admin credential.');return}
+token=entered;el('login-button').disabled=true;notice('');
+try{await load();el('token').value='';el('login').hidden=true;el('content').hidden=false}
+catch(error){token='';notice(error.message)}
+finally{el('login-button').disabled=false}}
+async function refresh(){notice('');try{await load()}catch(error){notice(error.message)}}
 async function load(){const p=new URLSearchParams();if(document.getElementById('excludeTest').checked)p.set('exclude_test','true');
 const st=document.getElementById('serviceType').value;if(st)p.set('service_type',st);
-const r=await api('/api/admin/responses?'+p);const d=await r.json();const tb=document.querySelector('#t tbody');tb.innerHTML='';
+const response=await api('/api/admin/responses?'+p);const d=await response.json();
+if(!Array.isArray(d.responses))throw new Error('The response list could not be read. Try refreshing.');
+const tb=document.querySelector('#t tbody');tb.replaceChildren();el('detail').textContent='Select a response to view.';
 for(const r of d.responses){const tr=document.createElement('tr');if(r.is_test)tr.className='test';
 const sv=r.answers.services?Object.keys(r.answers.services).join(', '):'';
 const ct=r.contact_name||r.contact_email||r.contact_phone||'';
-tr.innerHTML='<td>'+r.id.substring(0,8)+'…</td><td>'+r.created_at+'</td><td>'+r.language+'</td><td>'+(r.is_test?'yes':'no')+'</td><td>'+sv+'</td><td>'+ct+'</td>';
+for(const value of [r.id.substring(0,8)+'…',r.created_at,r.language,r.is_test?'yes':'no',sv,ct]){const cell=document.createElement('td');cell.textContent=value;tr.appendChild(cell)}
 const td=document.createElement('td');const vb=document.createElement('button');vb.textContent='View';vb.onclick=()=>document.getElementById('detail').textContent=JSON.stringify(r,null,2);td.appendChild(vb);
-const db=document.createElement('button');db.textContent='Delete';db.onclick=async()=>{if(confirm('Delete?')){await api('/api/admin/responses/'+r.id,'DELETE');load()}};td.appendChild(db);tr.appendChild(td);tb.appendChild(tr)}}
-function exportCsv(){const p=new URLSearchParams();if(document.getElementById('excludeTest').checked)p.set('exclude_test','true');
-const r=new XMLHttpRequest();r.open('GET','/api/admin/export?'+p);r.setRequestHeader('Authorization','Bearer '+token);r.responseType='blob';r.onload()=>{const u=URL.createObjectURL(r.response);const a=document.createElement('a');a.href=u;a.download='eta-responses.csv';a.click()};r.send()}
+tr.appendChild(td);tb.appendChild(tr)}
+notice(d.responses.length?'Loaded '+d.responses.length+' responses.':'No responses match these filters.')}
+async function exportCsv(){const p=new URLSearchParams();if(el('excludeTest').checked)p.set('exclude_test','true');
+try{const r=await api('/api/admin/export?'+p);
+if(!(r.headers.get('Content-Type')||'').includes('text/csv'))throw new Error('Export did not return a CSV file. No download was started.');
+const u=URL.createObjectURL(await r.blob());const a=document.createElement('a');a.href=u;a.download='eta-responses.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);notice('CSV download started.')}
+catch(error){notice(error.message)}}
 </script></body></html>`;
 }
 
@@ -256,10 +276,17 @@ export default {
       return json({ error: 'not found' }, 404);
     }
 
-    // Admin page — protected, inline HTML
+    // The login shell contains no responses; the API still authenticates every request.
     if (path === '/admin') {
-      if (!checkAuth(request, env)) return json({ error: 'Unauthorized' }, 401);
-      return new Response(adminPage(), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      if (method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
+      return new Response(adminPage(), { headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'Content-Security-Policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex, nofollow'
+      } });
     }
 
     // Block sensitive files from being served as assets
