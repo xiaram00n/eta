@@ -90,12 +90,12 @@ test('financial inputs reject malformed, negative, excessive-precision and fract
   assert.throws(() => model.parseMetric(question('existing_bookings_30d'), { status: 'value', value: '1.5' }), model.AnswerError);
 });
 
-test('payload drops hidden branches, obsolete questions and unconsented contact data', () => {
+test('payload drops hidden branches, obsolete questions and contact data embedded in research answers', () => {
   const answers = {
     ...answered(), service_use: 'never', current_approach: 'My current arrangements work.',
     left_service: 'An obsolete answer', payment_model: 'monthly', contact_email: 'not-for-sharing@example.test'
   };
-  const body = model.createSubmission(sections, answers, { purposes: [], method: 'email', contact: 'ignored@example.test' }, false, 'synthetic-id');
+  const body = model.createSubmission(sections, answers, { purposes: [] }, false, 'synthetic-id');
   assert.equal(body.answers.existing_spend_30d, undefined);
   assert.equal(body.answers.service_name, undefined);
   assert.equal(body.answers.left_service, undefined);
@@ -119,6 +119,22 @@ test('research can be entirely unanswered and follow-up permissions remain indep
   assert.equal(followup.contact_email, 'operator@example.test');
   assert.throws(() => model.cleanFollowUp({ purposes: ['prototype'], method: 'email', contact: '' }), model.AnswerError);
   assert.throws(() => model.cleanFollowUp({ purposes: ['prototype'], method: 'email', contact: 'invalid' }), model.AnswerError);
+});
+
+test('optional identity can be shared without granting follow-up permission or supplying contact details', () => {
+  const nameOnly = model.createSubmission(sections, {}, { purposes: [], name: ' Sample Operator ' }, false, 'name-only');
+  assert.equal(nameOnly.contact_name, 'Sample Operator');
+  assert.equal(nameOnly.contact_email, undefined);
+  assert.equal(nameOnly.contact_phone, undefined);
+  assert.equal(nameOnly.follow_up_consent, false);
+  const identity = model.createSubmission(sections, {}, {
+    purposes: [], name: 'Sample Operator', method: 'email', contact: 'sample@example.test'
+  }, false, 'identity');
+  assert.equal(identity.contact_email, 'sample@example.test');
+  assert.equal(identity.follow_up_consent, false);
+  assert.deepEqual(identity.answers.follow_up_purposes, []);
+  assert.throws(() => model.cleanFollowUp({ purposes: [], name: 'x'.repeat(201) }), model.AnswerError);
+  assert.throws(() => model.cleanFollowUp({ purposes: [], method: 'email', contact: 'invalid' }), model.AnswerError);
 });
 
 test('multi-select limits and exclusive answers cannot silently produce contradictory responses', () => {
@@ -150,7 +166,7 @@ class Element {
   focus() { this.document.activeElement = this; }
 }
 
-async function browser({ initial = {}, post, unavailableStorage = false, failStore = false, failRemove = false, questionFailure = false, search = '' } = {}) {
+async function browser({ initial = {}, post, unavailableStorage = false, failStore = false, failRemove = false, questionFailure = false, search = '', begin = true } = {}) {
   const values = new Map(Object.entries(initial));
   const document = {
     roots: [],
@@ -171,9 +187,11 @@ async function browser({ initial = {}, post, unavailableStorage = false, failSto
       return null;
     }
   };
-  for (const id of ['status', 'draft-notice', 'test', 'workspace', 'step', 'progress', 'survey', 'questions', 'controls', 'back', 'next', 'clear']) {
+  for (const id of ['status', 'draft-notice', 'test', 'cover', 'begin', 'workspace', 'progress-panel', 'step', 'progress', 'survey', 'questions', 'controls', 'back', 'next', 'clear']) {
     const element = document.createElement('div');
     element.id = id;
+    if (id === 'workspace') element.hidden = true;
+    if (id === 'begin') element.disabled = true;
     document.roots.push(element);
   }
   const sent = [];
@@ -203,6 +221,7 @@ async function browser({ initial = {}, post, unavailableStorage = false, failSto
   vm.runInNewContext(source, context);
   for (let i = 0; i < 6; i++) await new Promise(resolve => setImmediate(resolve));
   const $ = id => document.getElementById(id);
+  if (begin && !$('begin').disabled) $('begin').onclick();
   return {
     $, document, values, sent, errors,
     async click(id) { assert.ok($(id), 'Missing element: ' + id); if (!$(id).disabled) await $(id).onclick(); },
@@ -222,6 +241,42 @@ async function browser({ initial = {}, post, unavailableStorage = false, failSto
     async review() { for (let i = 0; i < 8; i++) await this.click('next'); }
   };
 }
+
+test('the cover requires Begin questionnaire and does not accompany the question pages', async () => {
+  const ui = await browser({ begin: false });
+  assert.equal(ui.$('cover').hidden, false);
+  assert.equal(ui.$('workspace').hidden, true);
+  assert.equal(ui.$('begin').disabled, false);
+  await ui.click('begin');
+  assert.equal(ui.$('cover').hidden, true);
+  assert.equal(ui.$('workspace').hidden, false);
+  assert.equal(ui.document.activeElement.id, 'section-title');
+  assert.ok(ui.$('working_roles-field'));
+  assert.doesNotMatch(ui.$('questions').textContent, new RegExp(sections[0].purpose.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  await ui.click('next');
+  await ui.click('back');
+  assert.equal(ui.$('cover').hidden, true);
+  assert.equal(ui.$('progress').value, 1);
+});
+
+test('only a confirmed save replaces the questions with a thank-you heading and closing message', async () => {
+  let release;
+  const ui = await browser({ post: () => new Promise(resolve => { release = resolve; }) });
+  await ui.review();
+  const saving = ui.click('submit-answers');
+  assert.equal(ui.$('progress-panel').hidden, false);
+  assert.doesNotMatch(ui.$('questions').textContent, /Your answers are saved/);
+  release({ ok: true, status: 201, json: async () => ({ success: true, id: 'synthetic-closing', created_at: '2026-11-11' }) });
+  await saving;
+  assert.equal(ui.$('cover').hidden, true);
+  assert.equal(ui.$('progress-panel').hidden, true);
+  assert.equal(ui.$('controls').hidden, true);
+  assert.equal(ui.$('questions').children.length, 2);
+  assert.equal(ui.$('section-title').textContent, 'Thank you.');
+  assert.match(ui.$('questions').textContent, /Your answers are saved/);
+  assert.doesNotMatch(ui.$('questions').textContent, /synthetic-closing|Submit answers|What may we contact/);
+  assert.equal(ui.document.activeElement.id, 'section-title');
+});
 
 test('controller branches immediately, removes obsolete answers and focuses the selected control', async () => {
   const ui = await browser();
@@ -265,20 +320,41 @@ test('invalid metric does not advance, while zero and unknown can be reviewed an
   assert.deepEqual(ui.sent[0].answers.existing_receipts_30d, { status: 'cannot_separate' });
 });
 
-test('optional contact is purpose-specific and revoking consent removes the contact before submission', async () => {
+test('identity fields and follow-up permissions can be independently declined before submission', async () => {
   const ui = await browser();
   await ui.review();
+  assert.match(ui.$('questions').textContent, /You do not have to share either/);
+  ui.input('follow-up-name-input', 'Sample Operator');
   ui.change('consent-clarification', undefined, true);
   ui.change('contact-method-email', undefined, true);
   ui.input('follow-up-contact-input', 'operator@example.test');
   ui.change('consent-clarification', undefined, false);
+  assert.equal(ui.$('follow-up-contact-input').value, 'operator@example.test');
+  ui.change('contact-method-none', undefined, true);
+  ui.input('follow-up-name-input', '');
   assert.equal(ui.$('follow-up-contact-input'), null);
   await ui.click('submit-answers');
   assert.equal(ui.sent[0].follow_up_consent, false);
   assert.equal(ui.sent[0].contact_email, undefined);
+  assert.equal(ui.sent[0].contact_name, undefined);
   assert.equal(ui.values.has(model.KEY), false);
   assert.equal(ui.values.has(model.PENDING_KEY), false);
   assert.match(ui.$('questions').textContent, /Your answers are saved/);
+});
+
+test('optional identity survives an uncertain save and reload without adding follow-up permission', async () => {
+  const ui = await browser({ post: async () => { throw new Error('ConnectionLost'); } });
+  await ui.review();
+  ui.input('follow-up-name-input', 'Sample Operator');
+  ui.change('contact-method-email', undefined, true);
+  ui.input('follow-up-contact-input', 'sample@example.test');
+  await ui.click('submit-answers');
+  assert.equal(ui.sent[0].follow_up_consent, false);
+  const resumed = await browser({ initial: Object.fromEntries(ui.values) });
+  assert.match(resumed.$('questions').textContent, /Sample Operator/);
+  await resumed.click('submit-answers');
+  assert.deepEqual(resumed.sent[0], ui.sent[0]);
+  assert.equal(resumed.sent[0].contact_name, 'Sample Operator');
 });
 
 test('ambiguous save retries the exact snapshot and id, including after reload', async () => {
@@ -386,7 +462,10 @@ test('actual response handler accepts version 2 answers and saves a retry only o
           async run() {
             assert.match(sql, /^INSERT INTO responses/);
             inserts++;
-            rows.set(values[1], { id: values[0], created_at: values[2], answers: JSON.parse(values[5]), contact_email: values[9] });
+            rows.set(values[1], {
+              id: values[0], created_at: values[2], answers: JSON.parse(values[5]),
+              contact_name: values[7], contact_email: values[9], follow_up_consent: values[10]
+            });
           }
         };
       }
@@ -404,6 +483,16 @@ test('actual response handler accepts version 2 answers and saves a retry only o
   assert.equal(inserts, 1);
   assert.equal(rows.get(body.submission_id).answers.existing_spend_30d.value, 40.5);
   assert.equal(rows.get(body.submission_id).contact_email, 'synthetic@example.test');
+  const optionalIdentity = model.createSubmission(sections, {}, {
+    purposes: [], name: 'Sample Operator', method: 'email', contact: 'sample@example.test'
+  }, true, 'synthetic-optional-identity');
+  const identityResponse = await context.worker.fetch(new Request('https://eta.invalid/api/responses', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(optionalIdentity)
+  }), env);
+  assert.equal(identityResponse.status, 201);
+  assert.equal(rows.get(optionalIdentity.submission_id).contact_name, 'Sample Operator');
+  assert.equal(rows.get(optionalIdentity.submission_id).contact_email, 'sample@example.test');
+  assert.equal(rows.get(optionalIdentity.submission_id).follow_up_consent, 0);
 });
 
 test('questionnaire resources and accessibility references are self-contained and use the approved emphasis', () => {

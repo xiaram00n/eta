@@ -17,7 +17,7 @@
     <span class="header-note">Better work starts<br>with understanding yours.</span>
   </header>
   <main id="main">
-    <section class="intro" aria-labelledby="intro-title">
+    <section id="cover" class="intro" aria-labelledby="intro-title">
       <p class="eyebrow">Your experience. A shared opportunity.</p>
       <h1 id="intro-title">Earn more.<br><em>Keep more of it.</em></h1>
       <p class="lead">We want to help you earn more from the work you already do, and keep more of what you earn.</p>
@@ -26,13 +26,16 @@
       <p class="shared-interest">A real opportunity becomes a shared interest when the success of one strengthens the other.</p>
       <div class="invitation"><span class="eyebrow">Help shape what comes next</span><p>Eight short sections, with fewer questions where they do not apply. Every research question is optional. Estimates and "not sure" are useful answers. No name or financial records needed.</p></div>
       <p class="privacy-note">Draft answers stay in this browser on this device until you clear them or a submission is confirmed. Only select "Submit answers" when you are ready to send them to ETA. On a shared device, clear your draft when finished.</p>
+      <button id="begin" class="button button-dark" type="button" disabled>Begin questionnaire</button>
     </section>
     <div id="test" class="notice" hidden>Test response: marked as test data, not an ordinary research response.</div>
     <div id="draft-notice" class="notice" role="status" hidden></div>
     <section id="workspace" class="workspace" aria-label="Operator questionnaire" hidden>
-      <div class="progress-top"><p id="step"></p><button id="clear" class="text-button" type="button">Clear draft</button></div>
-      <progress id="progress" value="0" max="8" aria-label="Section progress"></progress>
-      <p class="progress-help">Progress follows sections, not the number of questions answered.</p>
+      <div id="progress-panel">
+        <div class="progress-top"><p id="step"></p><button id="clear" class="text-button" type="button">Clear draft</button></div>
+        <progress id="progress" value="0" max="8" aria-label="Section progress"></progress>
+        <p class="progress-help">Progress follows sections, not the number of questions answered.</p>
+      </div>
       <form id="survey" novalidate>
         <div id="questions"></div>
         <div id="controls" class="controls">

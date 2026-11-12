@@ -96,18 +96,23 @@
 
   function cleanFollowUp(followUp) {
     const purposes = Array.isArray(followUp.purposes) ? PURPOSES.filter(purpose => followUp.purposes.includes(purpose)) : [];
-    if (!purposes.length) return { purposes: [] };
+    if (followUp.name != null && typeof followUp.name !== 'string' || typeof followUp.name === 'string' && followUp.name.length > 200) {
+      throw new AnswerError('follow-up-name', 'Keep your optional name within 200 characters, or leave it blank.');
+    }
+    const name = typeof followUp.name === 'string' ? followUp.name.trim() : '';
     const contact = typeof followUp.contact === 'string' ? followUp.contact.trim() : '';
-    if (!['email', 'phone'].includes(followUp.method) || !contact) {
-      throw new AnswerError('follow-up-contact', 'Choose a contact method and provide it, or untick the follow-up invitations to submit without contact details.');
+    if (contact || purposes.length) {
+      if (!['email', 'phone'].includes(followUp.method) || !contact) {
+        throw new AnswerError('follow-up-contact', 'If you would like a follow-up invitation, include a contact method and detail. Otherwise, untick the invitations to submit without contact details.');
+      }
     }
-    if (followUp.method === 'email' && (contact.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact))) {
-      throw new AnswerError('follow-up-contact', 'Enter a valid email address, or untick the invitations to submit without contact details.');
+    if (contact && followUp.method === 'email' && (contact.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact))) {
+      throw new AnswerError('follow-up-contact', 'Enter a valid email address, or remove it and untick any follow-up invitations to submit without contact details.');
     }
-    if (followUp.method === 'phone' && (contact.length > 50 || !/^[+\d()\s.-]+$/.test(contact) || contact.replace(/\D/g, '').length < 7)) {
-      throw new AnswerError('follow-up-contact', 'Enter a phone or WhatsApp number, including its area or country code, or untick the invitations.');
+    if (contact && followUp.method === 'phone' && (contact.length > 50 || !/^[+\d()\s.-]+$/.test(contact) || contact.replace(/\D/g, '').length < 7)) {
+      throw new AnswerError('follow-up-contact', 'Enter a phone or WhatsApp number, including its area or country code, or remove it and untick any follow-up invitations.');
     }
-    return { purposes, method: followUp.method, contact };
+    return { purposes, ...(name ? { name } : {}), ...(contact ? { method: followUp.method, contact } : {}) };
   }
 
   function createSubmission(sections, answers, followUp, isTest, id) {
@@ -124,7 +129,8 @@
       follow_up_consent: consent.purposes.length > 0,
       is_test: isTest
     };
-    if (body.follow_up_consent) body[consent.method === 'email' ? 'contact_email' : 'contact_phone'] = consent.contact;
+    if (consent.name) body.contact_name = consent.name;
+    if (consent.contact) body[consent.method === 'email' ? 'contact_email' : 'contact_phone'] = consent.contact;
     return body;
   }
 
@@ -219,6 +225,7 @@
           }
           const restored = createSubmission(sections, candidate.answers, {
             purposes: candidate.answers.follow_up_purposes || [],
+            name: candidate.contact_name || '',
             method: candidate.contact_email ? 'email' : 'phone',
             contact: candidate.contact_email || candidate.contact_phone || ''
           }, candidate.is_test, candidate.submission_id);
@@ -421,7 +428,8 @@
       titleNode.id = 'section-title';
       titleNode.tabIndex = -1;
       const root = $('questions');
-      root.replaceChildren(titleNode, node('p', purpose, 'purpose'));
+      root.replaceChildren(titleNode);
+      if (purpose) root.append(node('p', purpose, 'purpose'));
       return root;
     }
 
@@ -433,7 +441,7 @@
       const section = sections[step];
       $('step').textContent = (step + 1) + ' / ' + sections.length + ' · ' + section.title;
       $('progress').value = step + 1;
-      const root = heading(section.title, section.purpose);
+      const root = heading(section.title);
       if (!visible(section, answers)) {
         root.append(node('p', section.skipNote, 'notice'));
       } else {
@@ -448,10 +456,64 @@
 
     function appendFollowUp(root) {
       const panel = node('section', undefined, 'follow-up');
-      panel.append(node('h3', 'Stay involved, if you would like'));
-      panel.append(node('p', 'Your research response counts either way. These invitations are separate from the research questions, and do not sign you up for a service.', 'section-note'));
+      panel.append(node('h3', 'A little about you, only if you wish.'));
+      panel.append(node('p', "Your experience helps us understand what could make operators' work easier and more profitable. If you'd like us to know who these answers came from, you're welcome to leave your name and contact details below.", 'section-note'));
+      panel.append(node('p', 'You do not have to share either. Prefer not to? Thank you for taking the time to help.', 'optional-note'));
+      const nameLabel = node('label', 'Name (optional)', 'input-label');
+      nameLabel.htmlFor = 'follow-up-name-input';
+      const nameInput = node('input');
+      nameInput.id = nameLabel.htmlFor;
+      nameInput.type = 'text';
+      nameInput.maxLength = 200;
+      nameInput.autocomplete = 'name';
+      nameInput.value = followUp.name || '';
+      nameInput.setAttribute('aria-describedby', 'follow-up-name-error');
+      nameInput.oninput = () => {
+        followUp.name = nameInput.value;
+        clearError('follow-up-name');
+        save();
+      };
+      panel.append(nameLabel, nameInput, fieldError('follow-up-name'));
+      const contactField = node('fieldset', undefined, 'question');
+      contactField.append(node('legend', 'Contact details (optional)'));
+      for (const [value, text] of [['', 'Prefer not to share contact details'], ['email', 'Email'], ['phone', 'Phone / WhatsApp']]) {
+        const label = node('label', undefined, 'choice');
+        const input = node('input');
+        input.id = 'contact-method-' + (value || 'none');
+        input.type = 'radio';
+        input.name = 'contact-method';
+        input.checked = (followUp.method || '') === value;
+        input.onchange = () => {
+          followUp.method = value;
+          followUp.contact = '';
+          save();
+          renderReview(input.id);
+        };
+        label.append(input, node('span', text));
+        contactField.append(label);
+      }
+      if (followUp.method) {
+        const label = node('label', followUp.method === 'email' ? 'Email address (optional)' : 'Phone / WhatsApp number (optional)', 'input-label');
+        label.htmlFor = 'follow-up-contact-input';
+        const input = node('input');
+        input.id = label.htmlFor;
+        input.type = followUp.method === 'email' ? 'email' : 'tel';
+        input.maxLength = followUp.method === 'email' ? 200 : 50;
+        input.autocomplete = followUp.method === 'email' ? 'email' : 'tel';
+        input.value = followUp.contact || '';
+        input.setAttribute('aria-describedby', 'follow-up-contact-error');
+        input.oninput = () => {
+          followUp.contact = input.value;
+          clearError('follow-up-contact');
+          save();
+        };
+        contactField.append(label, input);
+      }
+      contactField.append(fieldError('follow-up-contact'));
+      panel.append(contactField);
+      panel.append(node('p', 'Sharing your details does not automatically give us permission to contact you. Choose an invitation below only if you would like one; include a contact detail if you do.', 'section-note'));
       const field = node('fieldset', undefined, 'question');
-      field.append(node('legend', 'What may we contact you about?'));
+      field.append(node('legend', 'May we contact you? (Optional)'));
       for (const [value, text] of [
         ['clarification', 'Clarifying my research answers'],
         ['prototype', 'Inviting me to give feedback on a prototype']
@@ -463,7 +525,6 @@
         input.checked = Array.isArray(followUp.purposes) && followUp.purposes.includes(value);
         input.onchange = () => {
           followUp.purposes = selectMultiple(followUp.purposes, value, input.checked);
-          if (!followUp.purposes.length) followUp = { purposes: [] };
           save();
           renderReview(input.id);
         };
@@ -471,45 +532,6 @@
         field.append(label);
       }
       panel.append(field);
-      if (followUp.purposes?.length) {
-        const contactField = node('fieldset', undefined, 'question');
-        contactField.append(node('legend', 'Your preferred contact method'));
-        for (const [value, text] of [['email', 'Email'], ['phone', 'Phone / WhatsApp']]) {
-          const label = node('label', undefined, 'choice');
-          const input = node('input');
-          input.id = 'contact-method-' + value;
-          input.type = 'radio';
-          input.name = 'contact-method';
-          input.checked = followUp.method === value;
-          input.onchange = () => {
-            followUp.method = value;
-            followUp.contact = '';
-            save();
-            renderReview(input.id);
-          };
-          label.append(input, node('span', text));
-          contactField.append(label);
-        }
-        if (followUp.method) {
-          const label = node('label', followUp.method === 'email' ? 'Email address' : 'Phone / WhatsApp number', 'input-label');
-          label.htmlFor = 'follow-up-contact-input';
-          const input = node('input');
-          input.id = label.htmlFor;
-          input.type = followUp.method === 'email' ? 'email' : 'tel';
-          input.maxLength = followUp.method === 'email' ? 200 : 50;
-          input.autocomplete = followUp.method === 'email' ? 'email' : 'tel';
-          input.value = followUp.contact || '';
-          input.setAttribute('aria-describedby', 'follow-up-contact-error');
-          input.oninput = () => {
-            followUp.contact = input.value;
-            clearError('follow-up-contact');
-            save();
-          };
-          contactField.append(label, input);
-        }
-        contactField.append(fieldError('follow-up-contact'));
-        panel.append(contactField);
-      }
       root.append(panel);
     }
 
@@ -533,9 +555,10 @@
       }
       if (pending) {
         const card = node('section', undefined, 'review-card');
-        card.append(node('h3', 'Follow-up permissions'));
+        card.append(node('h3', 'Your optional details and permissions'));
         const purposes = pending.answers.follow_up_purposes || [];
         card.append(node('p', pending.follow_up_consent ? purposes.map(value => value === 'prototype' ? 'Prototype feedback invitation' : 'Clarifying research answers').join('; ') : 'No follow-up contact requested.'));
+        if (pending.contact_name) card.append(node('p', pending.contact_name));
         const contact = pending.contact_email || pending.contact_phone;
         if (contact) card.append(node('p', contact));
         root.append(card);
@@ -593,11 +616,12 @@
         });
         if (response.status === 422) {
           answers = researchAnswers(sections, pending.answers);
-          followUp = pending.follow_up_consent ? {
+          followUp = {
             purposes: pending.answers.follow_up_purposes || [],
-            method: pending.contact_email ? 'email' : 'phone',
+            name: pending.contact_name || '',
+            method: pending.contact_email ? 'email' : pending.contact_phone ? 'phone' : '',
             contact: pending.contact_email || pending.contact_phone || ''
-          } : { purposes: [] };
+          };
           pending = null;
           removeStored(PENDING_KEY);
           save();
@@ -614,10 +638,8 @@
         $('draft-notice').hidden = true;
         removeStored(KEY);
         removeStored(PENDING_KEY);
-        const root = heading('Thank you. Your answers are saved.', 'Your experience will help us decide where a different approach could genuinely support operators.');
-        const confirmation = node('div', undefined, 'confirmation');
-        confirmation.append(node('p', 'Confirmation: ' + result.id));
-        root.append(confirmation);
+        heading('Thank you.', 'Your answers are saved. Your experience will help us decide where a different approach could genuinely support operators.');
+        $('progress-panel').hidden = true;
         $('controls').hidden = true;
         answers = {};
         followUp = { purposes: [] };
@@ -685,7 +707,12 @@
       message('');
       focusHeading();
     };
-    $('workspace').hidden = false;
+    $('begin').onclick = () => {
+      $('cover').hidden = true;
+      $('workspace').hidden = false;
+      focusHeading();
+    };
+    $('begin').disabled = false;
     if (pending) {
       $('clear').disabled = true;
       renderReview();
