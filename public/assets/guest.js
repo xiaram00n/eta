@@ -5,7 +5,7 @@
     taxi: { name: "Your local ride", short: "Local ride", amount: 80, description: "A dinner reservation, the beach, or the next stop in your day." },
     transfer: { name: "Your arrival, arranged", short: "Airport & ferry", amount: 110, description: "Keep arrival details, luggage and the onward journey together." },
     tour: { name: "Your day on the island", short: "Private tour", amount: 480, description: "Choose an example route, allow time to explore, and keep your group together." },
-    villa: { name: "Your stay, connected", short: "Villa stay", amount: 100, description: "Build a shared itinerary. Each arrival, outing and departure has its own arrangements." },
+    villa: { name: "Transportation during your stay", short: "Stay rides", amount: 100, description: "Plan each arrival, outing and departure with your group. This example arranges transportation, not lodging." },
     wedding: { name: "Everyone, in the right place", short: "Wedding", amount: 160, description: "Plan each pickup group and return. The whole plan needs the right vehicles, not just the first trip." }
   };
   const DRIVERS = {
@@ -550,7 +550,7 @@
       taxi: ["A clear pickup", "Add a return, note your luggage, and request a familiar driver. Availability still needs to be secured."],
       transfer: ["Arrive with a plan", "Add your flight or ferry details. An arrival delay should become a reviewed change, not a missed pickup."],
       tour: ["Room to explore", "These are example itineraries, not an operator's published tour. Changes to duration or stops need a fresh availability and price review."],
-      villa: ["One stay. Every ride.", "Your group can have separate arrivals and outings. A preferred driver is a request, not exclusive on-call availability."],
+      villa: ["Rides during your stay", "Your group can plan separate arrivals and outings. A preferred driver is a request, not exclusive on-call availability."],
       wedding: ["Every group accounted for", "Each pickup wave needs accepted vehicle capacity. This preview will not call the whole event confirmed if one group is still unsecured."]
     }[builderService];
     content.innerHTML = `<div class="dialog-body">
@@ -712,7 +712,7 @@
   function renderPlans() {
     openDialog();
     content.innerHTML = `<div class="dialog-body"><div class="dialog-heading"><div><p class="eyebrow">Together in one place</p><h2 id="journey-title">My plans</h2><p>Sample plans you create while this page is open. No account or real reservation is created.</p></div></div>
-      ${demo.plans.length ? [...demo.plans].reverse().map(plan => `<article class="plan-list-item"><div><h3>${SERVICES[plan.service].name}</h3><p>${escape(plan.id)} &middot; ${dateLabel(plan.legs[0].date)} &middot; ${plan.legs.length} ${plan.legs.length === 1 ? "trip" : "trips"}</p>${statusPill(plan.status)}</div>${button("open-plan", "View plan", "button-outline", `data-id="${plan.id}"`)}</article>`).join("") : `<section class="empty-state"><h3>Your next ride starts here.</h3><p>Arrange a ride or explore a sample stay. Your itinerary will appear here as you try the preview.</p>${button("sample-ride", "Try a sample ride", "button-dark")}${button("sample-stay", "Explore a sample stay")}</section>`}</div>`;
+      ${demo.plans.length ? [...demo.plans].reverse().map(plan => `<article class="plan-list-item"><div><h3>${SERVICES[plan.service].name}</h3><p>${escape(plan.id)} &middot; ${dateLabel(plan.legs[0].date)} &middot; ${plan.legs.length} ${plan.legs.length === 1 ? "trip" : "trips"}</p>${statusPill(plan.status)}</div>${button("open-plan", "View plan", "button-outline", `data-id="${plan.id}"`)}</article>`).join("") : `<section class="empty-state"><h3>Your next ride starts here.</h3><p>Arrange a local ride or plan transportation for a guest stay. Your sample itinerary will appear here as you explore the preview.</p>${button("sample-ride", "Try a sample ride", "button-dark")}${button("sample-stay", "Plan rides during a stay")}</section>`}</div>`;
     focusHeading();
   }
 

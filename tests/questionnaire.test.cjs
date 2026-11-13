@@ -306,7 +306,7 @@ async function browser({ initial = {}, post, unavailableStorage = false, failSto
   };
 }
 
-test('the cover requires Begin questionnaire and does not accompany the question pages', async () => {
+test('the cover requires Begin questionnaire and section purpose appears after it', async () => {
   const ui = await browser({ begin: false });
   assert.equal(ui.$('cover').hidden, false);
   assert.equal(ui.$('workspace').hidden, true);
@@ -316,11 +316,28 @@ test('the cover requires Begin questionnaire and does not accompany the question
   assert.equal(ui.$('workspace').hidden, false);
   assert.equal(ui.document.activeElement.id, 'section-title');
   assert.ok(ui.$('scope-field'));
-  assert.doesNotMatch(ui.$('questions').textContent, new RegExp(sections[0].purpose.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.ok(ui.$('questions').textContent.includes(sections[0].purpose));
   await ui.click('next');
   await ui.click('back');
   assert.equal(ui.$('cover').hidden, true);
   assert.equal(ui.$('progress').value, 1);
+});
+
+test('visible questionnaire sections explain why their answers inform the research', async () => {
+  const ui = await browser({ begin: true });
+  let pages = 0;
+  while (!ui.$('submit-answers')) {
+    assert.ok(++pages <= 14, 'Questionnaire should reach review in at most fourteen pages');
+    const sectionIndex = Number(ui.$('step').textContent.match(/^(\d+) \/ 8/)[1]) - 1;
+    const section = sections[sectionIndex];
+    if (section.id === 'service-value') {
+      assert.ok(ui.$('questions').textContent.includes(section.skipNote));
+    } else {
+      assert.ok(ui.$('questions').textContent.includes(section.purpose), section.id);
+    }
+    await ui.click('next');
+  }
+  assert.ok(pages <= 14);
 });
 
 test('only a confirmed save replaces the questions with a thank-you heading and closing message', async () => {
@@ -699,7 +716,7 @@ test('financial pages capture completed work and itemized spending separately an
   await ui.click('next');
   assert.equal(ui.$('section-title').textContent, 'What you receive and spend.');
   assert.match(ui.$('operating_cost_details-help').textContent, /frequency/);
-  assert.match(ui.$('operating_cost_details-help').textContent, /count them only once/);
+  assert.match(ui.$('operating_cost_details-help').textContent, /Service fees count once/);
   assert.match(ui.$('operating_cost_details-help').textContent, /unpaid administrative time is recorded separately/);
   ui.change('business_receipts_30d-status', 'value');
   ui.input('business_receipts_30d-input', '1200');
@@ -962,7 +979,7 @@ test('failed or malformed admin exports never start a success-shaped download', 
 
 test('questionnaire resources and accessibility references are self-contained and use the approved emphasis', () => {
   const html = fs.readFileSync(path.join(root, 'public/questionnaire/index.html'), 'utf8');
-  assert.match(html, /around island/);
+  assert.match(html, /around the island/);
   assert.match(html, /<strong>you<\/strong>/);
   assert.match(html, /<strong>we<\/strong>/);
   assert.match(html, /id="workspace"[^>]*hidden/);
@@ -979,20 +996,19 @@ test('the cover contains the requested copy and hierarchy while research heading
   const css = fs.readFileSync(path.join(root, 'public/assets/questionnaire.css'), 'utf8');
   assert.match(html, /Our best work starts<br>with understanding yours\./);
   assert.match(html, /VI Taxi Operator Research/);
-  assert.match(html, /Your shared experience &#8594; A way for us to make it better\./);
+  assert.match(html, /Help decide what ETA should build/);
   const hero = html.match(/<h1 id="intro-title">([\s\S]*?)<\/h1>/)[1];
-  assert.equal((hero.match(/class="hero-line"/g) || []).length, 3);
+  assert.equal((hero.match(/class="hero-line"/g) || []).length, 2);
   assert.deepEqual([...hero.matchAll(/<span>([^<]+)<\/span>/g)].map(match => match[1]),
-    ['Change nothing.', 'Book more rides.', 'Drive more.', 'Coordinate less.', 'Earn more.', 'Keep more of it.']);
-  assert.match(hero, /<em class="hero-line"><span>Earn more\.<\/span> <span>Keep more of it\.<\/span><\/em>/);
+    ['Better-arranged rides', 'start with your real work.']);
+  assert.match(hero, /<em class="hero-line"><span>start with your real work\.<\/span><\/em>/);
   assert.match(html, /<p><strong>Taxi operators asked, we listened\.<\/strong><\/p>/);
-  assert.match(html, /<strong>VI Transportation Operator Questionnaire\.<\/strong>/);
-  assert.match(html, /Please complete all sections as best as you can\./);
-  assert.match(html, /Detailed answers are most helpful, but estimates and "I'm not sure" are still useful answers\. Do not share sensitive information\./);
+  assert.match(html, /<strong>VI Transportation Operator Questionnaire<\/strong>/);
+  assert.match(html, /Every question is optional\. Estimates and “not sure” are useful\./);
   const invitation = html.match(/<div class="invitation">([\s\S]*?)<\/div>/)[1];
-  assert.match(invitation, /Help shape what we build to enhance your business\./);
-  assert.match(invitation, /A real opportunity becomes a shared interest/);
-  assert.doesNotMatch(invitation, /Eight short sections/);
+  assert.match(invitation, /Help decide what we build to support your business\./);
+  assert.match(invitation, /A useful system earns its place by improving existing work/);
+  assert.match(invitation, /Eight short sections about bookings, tools you use, work you complete/);
   assert.doesNotMatch(html, /class="lead"|shared-interest|Offline preview only/);
   assert.match(html, /id="begin"[^>]*>BEGIN &#10132;/);
   assert.match(css, /\.intro h1\{font-family:inherit;font-weight:750;[^}]*text-wrap:balance/);
@@ -1001,4 +1017,25 @@ test('the cover contains the requested copy and hierarchy while research heading
   assert.match(css, /\.intro h1 \.hero-line>span\{display:inline-block;white-space:nowrap\}/);
   assert.match(css, /\.workspace h2,\.workspace h3\{font-family:inherit;font-weight:750/);
   assert.match(css, /\.selection-help\{[^}]*background:var\(--accent\);color:var\(--white\);font-size:15px;font-weight:700/);
+});
+
+test('public prototype copy defines the service, roles, transportation scope and recommended next step', () => {
+  const partnership = fs.readFileSync(path.join(root, 'public/partnership/index.html'), 'utf8');
+  const guest = fs.readFileSync(path.join(root, 'public/index.html'), 'utf8');
+  const guestScript = fs.readFileSync(path.join(root, 'public/assets/guest.js'), 'utf8');
+  const launcher = fs.readFileSync(path.join(root, 'public/preview/index.html'), 'utf8');
+  assert.match(partnership, /ETA is a proposed booking and trip-coordination service for St\. Thomas transportation businesses/);
+  assert.match(partnership, /Intended business customer:<\/strong> a transportation operator or business/);
+  assert.match(partnership, /operator-side tools · not built/);
+  assert.match(partnership, /Who buys it and who handles coordination are still open questions/);
+  assert.ok(partnership.indexOf('href="/questionnaire/"') < partnership.indexOf('id="service"'));
+  assert.match(partnership, /Pickup access, service rules, applicable fares and any separate platform charges need confirmation/);
+  assert.match(guest, />Stay rides</);
+  assert.match(guest, /Transportation during guest stays/);
+  assert.match(guestScript, /name: "Transportation during your stay"/);
+  assert.doesNotMatch(guest, /Arrange your stay/);
+  assert.ok(launcher.indexOf('href="https://eta-stvi.hsvi.workers.dev/partnership/"')
+    < launcher.indexOf('href="https://eta-stvi.hsvi.workers.dev/"'));
+  assert.ok(launcher.indexOf('href="https://eta-stvi.hsvi.workers.dev/"')
+    < launcher.indexOf('href="https://eta-stvi.hsvi.workers.dev/questionnaire/"'));
 });

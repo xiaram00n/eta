@@ -509,7 +509,7 @@
       $('step').textContent = (step + 1) + ' / ' + sections.length + ' · ' + section.title
         + (pages.length > 1 ? ' · Page ' + (page + 1) + ' of ' + pages.length : '');
       $('progress').value = step + 1;
-      const root = heading(current.title);
+      const root = heading(current.title, visible(section, answers) ? section.purpose : undefined);
       if (!visible(section, answers)) {
         root.append(node('p', section.skipNote, 'notice'));
       } else {
