@@ -26,6 +26,7 @@ h1 em,h2 em{font-weight:400;color:var(--accent)}
 .intro h1 .hero-line{display:block}
 .intro h1 .hero-line>span{display:inline-block;white-space:nowrap}
 .intro>p:not(.eyebrow){max-width:760px;margin-bottom:14px}
+.service-proposal{max-width:760px;margin:18px 0;padding:clamp(16px,2.4vw,18px) clamp(18px,3vw,22px);background:var(--ink);border-left:4px solid var(--mango);color:var(--white);font-size:clamp(15px,1.8vw,16px);line-height:1.55}
 .invitation{max-width:820px;background:var(--peach);border-left:4px solid var(--accent);padding:20px 24px;margin-top:22px}
 .invitation p{margin:10px 0 0}
 .invitation .invitation-title{margin:0}

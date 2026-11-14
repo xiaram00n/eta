@@ -22,8 +22,9 @@
     <section class="opening section-width" aria-labelledby="opening-title">
       <div class="opening-copy">
         <p class="eyebrow"><span class="rule"></span> Your tourism website idea, made concrete</p>
-        <h1 id="opening-title">Make each ride clear<br>from request to <em>pickup.</em></h1>
-        <p class="opening-lead">ETA is a proposed booking and trip-coordination service for St. Thomas transportation businesses. Guests request rides. Participating operators review the details, decide whether to accept, and coordinate the driver, vehicle and pickup.</p>
+        <h1 id="opening-title">Make each ride easy,<br>from request to <em>pickup.</em></h1>
+        <p class="opening-lead">ETA is a proposed booking and trip-coordination service for St. Thomas transportation businesses. Guests would request rides; participating operators would decide whether to accept and provide the ride. ETA would then coordinate the confirmed driver, vehicle and pickup, manage changes, and provide updates to the guest on the operator's behalf.</p>
+        <p class="service-value">The aim is more efficient, convenient and faster travel for guests, while helping operators receive consistent guest requests, without the hassle of coordinating each booking.</p>
         <p>The guest prototype shows the traveler’s side. The operator tools are still a proposal. This walkthrough shows the work they may need to support and the questions we must answer before building them.</p>
         <div class="opening-actions">
           <a class="button button-dark" href="#service">See how a request works <span aria-hidden="true">&#8595;</span></a>
@@ -102,7 +103,27 @@
           <div><span class="column-label">Improvements worth investigating</span><h3>Less uncertainty. Better opportunities.</h3><ul class="editorial-list"><li>Requests with the details needed to judge the job.</li><li>Fewer calls just to establish who is available or where a pickup stands.</li><li>A clearer way to arrange return rides, groups and work shared with other operators.</li><li>A useful presence in front of guests who are looking for the service you actually provide.</li></ul></div>
         </div>
         <p class="section-footnote">These are goals to test, not results we can promise. The questionnaire asks which problems happen in your business and what—if anything—a system should change.</p>
-        <div class="participation-line"><p class="eyebrow">Participation has to mean something practical</p><p>Choose which work you take. Keep availability accurate enough to rely on. Accept or decline requests. Update important changes. We need to find the simplest way to do that during a real working day.</p><p class="note-small">Existing customers and referral relationships matter. We need to understand when operators want to share work, who can commit a driver and vehicle, and what should stay under their own control.</p></div>
+        <div class="participation-line">
+          <p class="eyebrow">Participation has to mean something practical</p>
+          <h3>Opt in to receive requests—and keep each commitment accurate.</h3>
+          <p>For ETA bookings to work, an operator would choose to participate and keep the system current. Opting in would not mean accepting every ride; it would mean taking responsibility for the work you choose to make available.</p>
+          <ol class="participation-steps">
+            <li><span>01</span><div><h4>Choose which work you take</h4><p>Set the services, areas, schedules and vehicle capacity you are willing to offer. Requests outside those choices should not be sent to you; you decide whether each request fits.</p></div></li>
+            <li><span>02</span><div><h4>Keep availability honest</h4><p>An active or reserved ride, on-call commitment, booked tour or paid day rate means you are committed unless you confirm spare capacity. Mark the work complete and confirm the driver and vehicle are free before showing them as available again. A map location alone is not availability.</p></div></li>
+            <li><span>03</span><div><h4>Accept or decline each request</h4><p>A request can remain available to other opted-in operators until one accepts. Once accepted, it must close to others and show the guest which operator is responsible. Confirmation and any payment must match that operator—not a different driver who simply arrives.</p></div></li>
+            <li><span>04</span><div><h4>Update changes with little effort</h4><p>Delays, pickup changes, cancellations and requests for help need a simple, reliable way to reach the responsible operator. The simplest safe workflow still needs to be tested during a real working day.</p></div></li>
+          </ol>
+          <div class="message-proposal">
+            <p class="column-label">Illustrative message flow · proposed, not built</p>
+            <h4>Make common updates one tap—not a conversation a driver has to manage.</h4>
+            <div class="message-examples">
+              <div><span>Operator → guest</span><p><strong>“Running behind — traffic delay.”</strong></p><p>Send the notice right away; share a revised pickup time only when it is confirmed.</p></div>
+              <div><span>Guest → operator</span><p><strong>“I can wait.” “I need a change.” “Please cancel.”</strong></p><p>A separate option could say: <strong>Chat with [Operator Name]</strong>.</p></div>
+            </div>
+            <p class="message-safety">A change or cancellation must reach the responsible operator or coordinator—not only a driver who may be moving. Show the guest whether a message was sent, delivered or acknowledged; delivery does not mean the operator has read or accepted it. Drivers must never be expected to read or reply in motion. Confirm notification channels and current local requirements before a live pilot.</p>
+          </div>
+          <p class="note-small">Existing customers and referral relationships matter. We need to understand when operators want to share work, who can commit a driver and vehicle, and what should stay under their own control.</p>
+        </div>
       </div>
     </section>
 
@@ -135,9 +156,9 @@
       <div class="roles-layout">
         <div class="role-column"><span class="column-label">Guest · booking user</span><h3>Describe the ride.<br>Review the arrangement.</h3><p>Share where and when you need transportation, who is traveling, and any relevant trip details. A request is not a confirmed ride until an operator accepts and the work is committed.</p></div>
         <div class="role-column"><span class="column-label">Operator or business · intended customer</span><h3>Choose the work.<br>Commit the service.</h3><p>Decide which requests fit, what price applies, and who will provide the suitable vehicle. Keep control of existing guests and choose when—if ever—to share work.</p></div>
-        <div class="role-column"><span class="column-label">Driver · service provider</span><h3>Take the trip<br>you have agreed to do.</h3><p>A driver needs to know the pickup, schedule and vehicle arrangement—and to be actually available and committed. The prototype does not assume a location dot creates availability.</p></div>
-        <div class="role-column collaboration-note"><span class="column-label">What we are asking from you now</span><h3>Help us understand the work.</h3><p>You know the local working reality and may challenge or explain the idea. If you choose, you can introduce willing operators for feedback. You are not being asked to sell a service, guarantee bookings, or promise anyone will participate.</p><p>I will use the research to refine the prototype, explain what remains unknown and bring concrete choices back for discussion. No operating or commercial arrangement is being assumed.</p></div>
+        <div class="role-column"><span class="column-label">Driver · service provider</span><h3>Take the trip<br>you have agreed to do.</h3><p>A driver needs to know the pickup, schedule and vehicle arrangement—and to be actually available and committed. A map location alone does not confirm that a driver is available or committed to the trip.</p></div>
       </div>
+      <div class="role-column collaboration-note"><span class="column-label">What we are asking from you now</span><h3>Help us understand the work.</h3><p>You know the local working reality and may challenge or explain the idea. If you choose, you can introduce willing operators for feedback. You are not being asked to sell a service, guarantee bookings, or promise anyone will participate.</p><p>I will use the research to refine the prototype, explain what remains unknown and bring concrete choices back for discussion. No operating or commercial arrangement is being assumed.</p></div>
       <details class="conversation-detail"><summary>A simple way to explain the idea to another operator</summary><blockquote>We're exploring a way to make arranging rides clearer for guests and the operators doing the work. The example shows what might be possible; it is not a service already taking bookings. We'd like to understand how your business works, what you already use, and what would genuinely make the work easier. Your experience will help us judge what is useful and what we should change.</blockquote><p class="note-small">Use this as a starting point for the conversation, not a script that replaces listening.</p></details>
     </section>
 

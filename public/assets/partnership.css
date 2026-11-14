@@ -44,6 +44,7 @@ p:last-child { margin-bottom: 0; }
 .opening h1 { margin-bottom: 24px; font-size: clamp(50px, 5.7vw, 76px); letter-spacing: -3px; text-wrap: balance; }
 .opening-copy > p:not(.eyebrow):not(.caption) { max-width: 590px; color: var(--muted); }
 .opening-copy .opening-lead { color: var(--ink) !important; font-size: 18px; line-height: 1.55; }
+.opening-copy > p.service-value:not(.eyebrow):not(.caption) { margin: 0 0 20px; padding: 14px 18px; border-left: 3px solid var(--mango); background: var(--sage); color: var(--ink); font-size: clamp(14px, 1.2vw, 15px); line-height: 1.55; }
 .opening-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 22px; margin-top: 20px; }
 .button { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 48px; padding: 15px 23px; border: 1px solid transparent; text-decoration: none; font-size: 12px; font-weight: 600; }
 .button-dark { background: var(--ocean); color: var(--paper); }
@@ -102,6 +103,7 @@ p:last-child { margin-bottom: 0; }
 .plain-takeaway > p { max-width: 740px; font-size: 14px; }
 .operator-section { background: var(--stone); border-block: 1px solid var(--line); }
 .operator-columns, .roles-layout, .research-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 9%; }
+.roles-layout { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
 .column-label { margin-bottom: 14px; color: var(--muted); font-size: 10px; }
 .operator-columns h3, .role-column h3, .research-columns h3 { font: 30px/1.2 var(--serif); font-weight: 400; }
 .editorial-list { list-style: none; margin: 0; padding: 0; }
@@ -110,7 +112,22 @@ p:last-child { margin-bottom: 0; }
 .section-footnote { max-width: 850px; margin-top: 25px; padding: 18px 22px; background: var(--ocean); color: var(--paper); border-left: 4px solid var(--mango); font-size: 14px; line-height: 1.65; }
 .participation-line { border: 1px solid var(--line); border-left: 4px solid var(--ocean); background: var(--paper); padding: 24px; margin-top: 35px; max-width: 850px; }
 .participation-line .eyebrow { margin-bottom: 12px; }
+.participation-line > h3 { margin-bottom: 14px; font: clamp(25px, 3vw, 34px)/1.2 var(--serif); }
 .participation-line > p:not(.eyebrow):not(.note-small) { font-size: 15px; }
+.participation-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
+.participation-steps li { display: grid; grid-template-columns: 32px 1fr; gap: 12px; padding: 18px; background: var(--stone); border-top: 2px solid var(--ocean); }
+.participation-steps li > span { color: var(--ocean); font: 24px/1 var(--serif); }
+.participation-steps h4 { margin: 0 0 8px; font-size: 14px; }
+.participation-steps p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.message-proposal { margin-top: 24px; padding: 24px; background: var(--ink); color: var(--paper); border-left: 4px solid var(--mango); }
+.message-proposal .column-label { margin-bottom: 12px; color: var(--mango); }
+.message-proposal h4 { margin-bottom: 18px; font: 24px/1.3 var(--serif); }
+.message-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.message-examples > div { min-width: 0; padding: 18px; background: var(--paper); color: var(--ink); }
+.message-examples span { display: block; margin-bottom: 12px; color: var(--ocean); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.message-examples p { margin: 0 0 10px; font-size: 13px; }
+.message-examples p:last-child { margin-bottom: 0; color: var(--muted); }
+.message-safety { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid #665361; color: var(--paper); font-size: 13px; line-height: 1.6; }
 .participation-line .note-small { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 18px; color: var(--ink); }
 .reach-layout { display: grid; grid-template-columns: .8fr 1.2fr; gap: 9%; }
 .reach-question { padding: 30px; background: var(--ink); color: var(--paper); align-self: start; }
@@ -130,8 +147,8 @@ p:last-child { margin-bottom: 0; }
 .name-meanings p { color: var(--muted); font-size: 15px; }
 .role-column { min-width: 0; padding: 24px; background: var(--paper); border: 1px solid var(--line); border-top: 4px solid var(--ocean); }
 .role-column p { color: var(--muted); font-size: 15px; }
-.collaboration-note { grid-column: 1 / -1; background: var(--sage); }
-.conversation-detail { border-block: 1px solid var(--line); padding: 0 5px; }
+.collaboration-note { margin-top: 26px; background: var(--sage); }
+.conversation-detail { margin-top: 34px; border-block: 1px solid var(--line); padding: 0 5px; }
 .conversation-detail summary { padding: 20px 0; min-height: 50px; color: var(--ocean); font-size: 14px; font-weight: 600; }
 .conversation-detail blockquote { max-width: 830px; margin: 10px 0 25px; padding-left: 24px; border-left: 2px solid var(--coral); font: 23px/1.6 var(--serif); }
 .conversation-detail .note-small { padding-bottom: 25px; }
@@ -155,6 +172,7 @@ p:last-child { margin-bottom: 0; }
 .site-footer > a:last-child { margin-left: auto; font-size: 12px; }
 @media (max-width: 1050px) {
   .opening { gap: 5%; }
+  .roles-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .opening-note { padding: 28px; }
   .opening-note h2 { font-size: 34px; }
   .chapter-nav { position: static; }
@@ -191,8 +209,9 @@ p:last-child { margin-bottom: 0; }
   .ride-flow li:nth-child(even) { padding-left: 18px; border-left: 1px solid var(--line); }
   .ride-flow li:nth-child(n+3) { border-top: 1px solid var(--line); }
   .plain-takeaway { grid-template-columns: 1fr; gap: 12px; }
+  .participation-steps, .message-examples { grid-template-columns: 1fr; }
+  .participation-line, .message-proposal { padding: 20px; }
   .operator-columns, .roles-layout, .research-columns, .name-meanings { grid-template-columns: 1fr; gap: 18px; }
-  .collaboration-note { grid-column: auto; }
   .reach-layout { grid-template-columns: 1fr; gap: 35px; }
   .reach-question { padding: 28px; }
   .reach-question h3 { font-size: 33px; }

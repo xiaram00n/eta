@@ -647,7 +647,7 @@
     return `<p class="help-text">Messages stay with the plan. This demonstration does not send anything, record audio or translate your text.</p>
       <div class="messages-list">${plan.messages.map(item => `<article class="message ${item.system ? "" : "guest"}"><span class="message-author">${escape(item.author)}</span><p>${escape(item.text)}</p><small>${item.system ? "Illustrative message" : "Sample only / not delivered"}</small></article>`).join("")}</div>
       <form id="message-form" class="journey-form"><label>Message about your trip<textarea name="message" maxlength="600" placeholder="For example: Which entrance should we meet at?" required></textarea></label><div class="form-actions"><button type="submit" class="button button-dark">Add sample message</button>${button("sample-reply", "Preview an operator reply")}</div></form>
-      <details class="demo-tools"><summary>Voice &amp; language support</summary><p>The intended service includes voice messages and language assistance. Recording, translation and delivery require a connected implementation; they are not represented as working in this local preview.</p></details>`;
+      <details class="demo-tools"><summary>Voice &amp; language support</summary><p>Voice messages and language assistance are possibilities to investigate, not confirmed features. Recording, translation and delivery require a connected implementation; they are not represented as working in this local preview.</p></details>`;
   }
 
   function paymentsPanel(plan) {
@@ -742,7 +742,7 @@
     if (action === "sample-stay") { openBuilder("villa"); return; }
     if (action === "about-preview") {
       openDialog();
-      content.innerHTML = `<div class="dialog-body"><p class="eyebrow">About this experience</p><h2 id="journey-title">A service you can explore.</h2><p>This is a local interactive concept for transportation in St. Thomas, not an operating transport service.</p><ul class="feature-list"><li>All operators, capacity, quotes, messages and trip updates are examples.</li><li>No booking, payment, location tracking or message is sent.</li><li>Sample plans are kept only in memory and disappear when this page reloads.</li><li>Use sample details, not private travel information.</li></ul>${button("sample-ride", "Try a sample ride", "button-dark")}</div>`;
+      content.innerHTML = `<div class="dialog-body"><p class="eyebrow">About this experience</p><h2 id="journey-title">A service you can explore.</h2><p>ETA is a proposed booking and trip-coordination service. Guests request rides from participating St. Thomas operators; operators decide whether to accept and provide the ride. ETA would coordinate the confirmed driver, vehicle, pickup and updates on the operator's behalf.</p><ul class="feature-list"><li>This is an interactive concept, not an operating transport service.</li><li>All operators, capacity, quotes, messages and trip updates are examples.</li><li>No booking, payment, location tracking or message is sent.</li><li>Sample plans are kept only in memory and disappear when this page reloads.</li><li>Use sample details, not private travel information.</li></ul>${button("sample-ride", "Try a sample ride", "button-dark")}</div>`;
       focusHeading(); return;
     }
     if (action === "open-plan") { selectedLeg = null; showPlan(demo.get(element.dataset.id)); return; }
