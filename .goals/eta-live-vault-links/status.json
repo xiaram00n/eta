@@ -1,6 +1,6 @@
 {
   "goal_id": "eta-live-vault-links",
-  "status": "inspecting",
+  "status": "completed",
   "iteration": 1,
   "builder_model": "runtime-default",
   "inspector_model": "runtime-default",
