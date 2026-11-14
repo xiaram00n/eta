@@ -1,10 +1,15 @@
 {
   "goal_id": "eta-live-vault-links",
-  "status": "building",
+  "status": "inspecting",
   "iteration": 1,
   "builder_model": "runtime-default",
   "inspector_model": "runtime-default",
   "initial_sha": "c4a590cfc188805cbd07e6155f1b832635d996fb",
   "created_at": "2026-11-14T18:04:17Z",
-  "history": []
+  "history": [
+    {
+      "iteration": 1,
+      "verdict": "PASS"
+    }
+  ]
 }
